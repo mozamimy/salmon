@@ -1,0 +1,7 @@
+[package]
+name = "salmon"
+version = "0.1.0"
+authors = ["mozamimy <alice@mozami.me>"]
+edition = "2018"
+
+[dependencies]
