@@ -3,7 +3,8 @@ extern crate pulldown_cmark;
 use pulldown_cmark::{Parser, Options, html};
 
 pub struct Builder<'a> {
-    pub root_path: &'a std::path::Path,
+    pub src_path: &'a std::path::Path,
+    pub dest_path: &'a std::path::Path,
 }
 
 impl<'a> Builder<'a> {
@@ -17,7 +18,8 @@ impl<'a> Builder<'a> {
         let mut html_output: String = String::with_capacity(markdown_input.len() * 3 / 2);
         pulldown_cmark::html::push_html(&mut html_output, parser);
 
-        println!("Given path: {:?}", self.root_path);
+        println!("Given source path: {:?}", self.src_path);
+        println!("Given destination path: {:?}", self.dest_path);
         println!("Out: {}", &html_output);
     }
 }
