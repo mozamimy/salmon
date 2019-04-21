@@ -1,18 +1,33 @@
-extern crate pulldown_cmark;
+extern crate clap;
 
-use pulldown_cmark::{Parser, Options, html};
+mod builder;
 
 fn main() {
-    println!("Hello, world!");
+    let matches = clap::App::new("salmon")
+                    .version("0.1.0")
+                    .author("mozamimy <alice@mozami.me>")
+                    .about("A lightweight static site generator specialized for blogging.")
+                    .subcommand(clap::SubCommand::with_name("build")
+                        .arg(clap::Arg::with_name("SRC_DIR")
+                            .help("Specify a directory which has salmon source files.")
+                            .index(1)
+                        )
+                    ).get_matches();
 
-    let markdown_input: &str = "Hello world, this is a ~~complicated~~ *very simple* example.";
-
-    let mut options = pulldown_cmark::Options::empty();
-    options.insert(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
-    let parser = pulldown_cmark::Parser::new_ext(markdown_input, options);
-
-    let mut html_output: String = String::with_capacity(markdown_input.len() * 3 / 2);
-    pulldown_cmark::html::push_html(&mut html_output, parser);
-
-    println!("Out: {}", &html_output);
+    match matches {
+        ref m if m.subcommand_matches("build").is_some() => {
+            let builder: builder::Builder;
+            if let Some(src_dir) = m.subcommand_matches("build").unwrap().value_of("SRC_DIR") {
+                builder = builder::Builder{
+                    root_path: std::path::Path::new(src_dir),
+                }
+            } else {
+                builder = builder::Builder{
+                    root_path: std::path::Path::new("./"),
+                }
+            }
+            builder.build();
+        },
+        _ => { eprintln!("Subcommand is not specified or unsupported subcommand.\nexit."); std::process::exit(1) },
+    }
 }
