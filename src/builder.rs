@@ -1,14 +1,28 @@
 use std::io::prelude::*;
+use crate::article::Article;
+use crate::tag::Tag;
 
 pub struct Builder<'a> {
-    pub src_path: &'a std::path::Path,
-    pub dest_path: &'a std::path::Path,
+    src_path: &'a std::path::Path,
+    dest_path: &'a std::path::Path,
+    articles: Vec<Article>,
+    tags: Vec<Tag>,
+}
+
+pub fn new<'a>(src_path: &'a std::path::Path, dest_path: &'a std::path::Path) -> Builder<'a> {
+    Builder {
+        src_path: src_path,
+        dest_path: dest_path,
+        articles: Vec::new(),
+        tags: Vec::new(),
+    }
 }
 
 impl<'a> Builder<'a> {
     pub fn build(&self) -> Result<(), failure::Error> {
         let article_path_buf = self.src_path.join("articles/**/*.md");
         let article_md_glob = article_path_buf.to_str().unwrap();
+
         for entry in glob::glob(article_md_glob)? {
             match entry {
                 Ok(path) => self.build_md_file(&path)?,

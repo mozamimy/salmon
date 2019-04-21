@@ -1,10 +1,13 @@
+extern crate chrono;
 extern crate clap;
 #[macro_use]
 extern crate failure;
 extern crate glob;
 extern crate pulldown_cmark;
 
-mod builder;
+pub mod article;
+pub mod builder;
+pub mod tag;
 
 fn main() {
     let matches = clap::App::new("salmon")
@@ -32,10 +35,7 @@ fn main() {
             } else {
                 dest_path = std::path::Path::new(dest_path_buf);
             }
-            let builder = builder::Builder{
-                src_path: src_path,
-                dest_path: dest_path,
-            };
+            let builder = builder::new(src_path, dest_path);
 
             match builder.build() {
                 Ok(_) => println!("Succeed to build."),
