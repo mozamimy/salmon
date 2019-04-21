@@ -1,4 +1,8 @@
 extern crate clap;
+#[macro_use]
+extern crate failure;
+extern crate glob;
+extern crate pulldown_cmark;
 
 mod builder;
 
@@ -32,7 +36,11 @@ fn main() {
                 src_path: src_path,
                 dest_path: dest_path,
             };
-            builder.build();
+
+            match builder.build() {
+                Ok(_) => println!("Succeed to build."),
+                Err(e) => { eprintln!("{:?}", e); std::process::exit(1) }
+            }
         },
         _ => { eprintln!("Subcommand is not specified or unsupported subcommand.\nexit."); std::process::exit(1) },
     }
