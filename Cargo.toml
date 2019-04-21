@@ -5,4 +5,5 @@ authors = ["mozamimy <alice@mozami.me>"]
 edition = "2018"
 
 [dependencies]
+clap = "2.33"
 pulldown-cmark = "0.4"
