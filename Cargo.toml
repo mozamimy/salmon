@@ -6,4 +6,6 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33"
+failure = "0.1"
+glob = "0.3"
 pulldown-cmark = "0.4"
