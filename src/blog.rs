@@ -18,9 +18,9 @@ pub struct Blog {
     dest_dir: std::path::PathBuf,
 
     articles_by_tag: ArticlesByTag,
-    sorted_articles: Vec<Rc<Article>>,
+    pub sorted_articles: Vec<Rc<Article>>,
     layouts: Layouts,
-    pub partials: Vec<Partial>,
+    partials: Vec<Partial>,
     pages: Vec<Page>,
     resources: Vec<Resource>,
 }

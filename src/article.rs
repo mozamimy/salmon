@@ -9,7 +9,7 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Article {
     title: String,
-    pub date: chrono::Date<chrono::Utc>,
+    pub date: chrono::NaiveDate,
     tags: Vec<String>,
     body: String,
     html: String,
@@ -65,9 +65,9 @@ fn load_article(article_path: &PathBuf) -> Result<Article, Error> {
 
 fn decompose_source(
     source: &str,
-) -> Result<(String, chrono::Date<chrono::Utc>, Vec<String>, String), Error> {
+) -> Result<(String, chrono::NaiveDate, Vec<String>, String), Error> {
     let mut title = String::new();
-    let mut date = chrono::Utc::today();
+    let mut date = chrono::NaiveDate::parse_from_str("2019-04-01", "%Y-%m-%d").unwrap();
     let mut tags = Vec::new();
     let mut body = String::with_capacity(source.len());
 
@@ -99,14 +99,7 @@ fn decompose_source(
                     let v: Vec<&str> = trimmed_line.split(':').collect();
                     match v.get(1) {
                         Some(s) => {
-                            let mut datetime_string = s.trim().to_string();
-                            datetime_string.push_str(" 00:00:00 +00:00");
-                            date = chrono::DateTime::parse_from_str(
-                                datetime_string.as_str(),
-                                "%Y-%m-%d %H:%M:%S %z",
-                            )?
-                            .with_timezone(&chrono::Utc)
-                            .date();
+                            date = chrono::NaiveDate::parse_from_str(s.trim(), "%Y-%m-%d")?;
                         }
                         None => {
                             return Err(format_err!(
