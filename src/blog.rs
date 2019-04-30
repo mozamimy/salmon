@@ -6,6 +6,7 @@ use crate::page::load_pages;
 use crate::page::Page;
 use crate::resource::load_resources;
 use crate::resource::Resource;
+use failure::Error;
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -20,14 +21,13 @@ pub struct Blog {
 }
 
 impl Blog {
-    pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Self {
-        // TODO: Error handling (do not use unwrap()).
-        let articles_by_tag = load_articles(&src_dir).unwrap();
-        let layouts = load_layouts(&src_dir).unwrap();
-        let pages = load_pages(&src_dir).unwrap();
-        let resources = load_resources(&src_dir).unwrap();
+    pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Result<Self, Error> {
+        let articles_by_tag = load_articles(&src_dir)?;
+        let layouts = load_layouts(&src_dir)?;
+        let pages = load_pages(&src_dir)?;
+        let resources = load_resources(&src_dir)?;
 
-        Blog {
+        Ok(Blog {
             src_dir: src_dir,
             dest_dir: dest_dir,
 
@@ -35,6 +35,6 @@ impl Blog {
             layouts: layouts,
             pages: pages,
             resources: resources,
-        }
+        })
     }
 }

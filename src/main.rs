@@ -49,8 +49,18 @@ fn main() {
             } else {
                 dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
             }
-            let blog = Blog::init(src_dir, dest_dir);
-            println!("{:?}", blog.layouts);
+
+            let init_blog_result = Blog::init(src_dir, dest_dir);
+            match init_blog_result {
+                Ok(blog) => println!("{:?}", blog.layouts),
+                Err(e) => {
+                    println!(
+                        "An error is occured while loading components.\n{:?}\nexit.",
+                        e
+                    );
+                    std::process::exit(1);
+                }
+            }
         }
         _ => {
             eprintln!("Subcommand is not specified or unsupported subcommand.\nexit.");
