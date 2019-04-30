@@ -1,3 +1,4 @@
+use crate::converter;
 use failure::Error;
 use std::collections::HashMap;
 use std::fs::File;
@@ -49,7 +50,7 @@ fn load_article(article_path: &PathBuf) -> Result<Article, Error> {
     file.read_to_string(&mut source)?;
 
     let (title, date, tags, body) = decompose_source(&source)?;
-    let html = convert_to_html(&body);
+    let html = converter::convert_to_html(&body);
 
     Ok(Article {
         title: title,
@@ -142,14 +143,4 @@ fn decompose_source(
     }
 
     Ok((title, date, tags, body))
-}
-
-fn convert_to_html(body: &str) -> String {
-    let mut options = pulldown_cmark::Options::empty();
-    options.insert(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
-    let parser = pulldown_cmark::Parser::new_ext(body, options);
-
-    let mut built_html = String::with_capacity(body.len() * 3 / 2);
-    pulldown_cmark::html::push_html(&mut built_html, parser);
-    built_html
 }

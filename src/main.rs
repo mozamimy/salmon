@@ -7,6 +7,7 @@ extern crate pulldown_cmark;
 
 pub mod article;
 pub mod blog;
+pub mod converter;
 pub mod layout;
 pub mod page;
 pub mod resource;
