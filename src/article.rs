@@ -9,7 +9,7 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Article {
     title: String,
-    date: chrono::Date<chrono::Utc>,
+    pub date: chrono::Date<chrono::Utc>,
     tags: Vec<String>,
     body: String,
     html: String,
@@ -17,8 +17,9 @@ pub struct Article {
 
 pub type ArticlesByTag = HashMap<String, Vec<Rc<Article>>>;
 
-pub fn load_articles(src_dir: &PathBuf) -> Result<ArticlesByTag, Error> {
+pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article>>), Error> {
     let mut articles = ArticlesByTag::new();
+    let mut sorted_articles = Vec::new();
 
     let article_dir_glob = glob::glob(&src_dir.join("articles/**/*.md").to_str().unwrap())?;
 
@@ -35,13 +36,14 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<ArticlesByTag, Error> {
                         .get_mut(tag.as_str())
                         .unwrap()
                         .push(article.clone());
+                    sorted_articles.push(article.clone());
                 }
             }
             Err(e) => return Err(format_err!("{:?}", e)),
         }
     }
-
-    Ok(articles)
+    sorted_articles.sort_by_key(|a| a.date);
+    Ok((articles, sorted_articles))
 }
 
 fn load_article(article_path: &PathBuf) -> Result<Article, Error> {

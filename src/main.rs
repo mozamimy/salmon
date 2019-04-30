@@ -52,7 +52,13 @@ fn main() {
 
             let init_blog_result = Blog::init(src_dir, dest_dir);
             match init_blog_result {
-                Ok(blog) => println!("{:?}", blog.layouts),
+                Ok(blog) => println!(
+                    "{:?}",
+                    blog.sorted_articles
+                        .iter()
+                        .map(|a| a.date)
+                        .collect::<Vec<chrono::Date<chrono::Utc>>>()
+                ),
                 Err(e) => {
                     println!(
                         "An error is occured while loading components.\n{:?}\nexit.",

@@ -8,6 +8,7 @@ use crate::resource::load_resources;
 use crate::resource::Resource;
 use failure::Error;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Blog {
@@ -15,14 +16,15 @@ pub struct Blog {
     dest_dir: std::path::PathBuf,
 
     articles_by_tag: ArticlesByTag,
-    pub layouts: Layouts,
+    pub sorted_articles: Vec<Rc<Article>>,
+    layouts: Layouts,
     pages: Vec<Page>,
     resources: Vec<Resource>,
 }
 
 impl Blog {
     pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Result<Self, Error> {
-        let articles_by_tag = load_articles(&src_dir)?;
+        let (articles_by_tag, sorted_articles) = load_articles(&src_dir)?;
         let layouts = load_layouts(&src_dir)?;
         let pages = load_pages(&src_dir)?;
         let resources = load_resources(&src_dir)?;
@@ -32,9 +34,14 @@ impl Blog {
             dest_dir: dest_dir,
 
             articles_by_tag: articles_by_tag,
+            sorted_articles: sorted_articles,
             layouts: layouts,
             pages: pages,
             resources: resources,
         })
     }
+
+    // pub fn build(&self) -> Result<(), Error> {
+    //     Ok(())
+    // }
 }
