@@ -50,7 +50,7 @@ fn main() {
                 dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
             }
             let blog = Blog::init(src_dir, dest_dir);
-            println!("{:?}", blog.resources);
+            println!("{:?}", blog.layouts);
         }
         _ => {
             eprintln!("Subcommand is not specified or unsupported subcommand.\nexit.");
