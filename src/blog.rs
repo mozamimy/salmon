@@ -1,6 +1,7 @@
 use crate::article::ArticlesByTag;
 use crate::article::*;
 use crate::layout::Layout;
+use crate::page::load_pages;
 use crate::page::Page;
 use crate::resource::Resource;
 use std::path::PathBuf;
@@ -12,15 +13,16 @@ pub struct Blog {
 
     articles_by_tag: ArticlesByTag,
     layouts: Vec<Layout>,
-    pages: Vec<Page>,
+    pub pages: Vec<Page>,
     resources: Vec<Resource>,
 }
 
 impl Blog {
     pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Self {
+        // TODO: Error handling (do not use unwrap()).
         let articles_by_tag = load_articles(&src_dir).unwrap();
         let layouts = scan_layouts();
-        let pages = scan_pages();
+        let pages = load_pages(&src_dir).unwrap();
         let resources = scan_resources();
 
         Blog {
@@ -34,12 +36,11 @@ impl Blog {
         }
     }
 }
+
 fn scan_layouts() -> Vec<Layout> {
     Vec::new()
 }
-fn scan_pages() -> Vec<Page> {
-    Vec::new()
-}
+
 fn scan_resources() -> Vec<Resource> {
     Vec::new()
 }
