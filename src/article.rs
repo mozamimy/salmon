@@ -9,10 +9,11 @@ use std::rc::Rc;
 #[derive(Debug)]
 pub struct Article {
     title: String,
-    pub date: chrono::NaiveDate,
+    date: chrono::NaiveDate,
     tags: Vec<String>,
     body: String,
     html: String,
+    pub path: PathBuf,
 }
 
 pub type ArticlesByTag = HashMap<String, Vec<Rc<Article>>>;
@@ -27,7 +28,7 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
         println!("{:?}", entry);
         match entry {
             Ok(path) => {
-                let article = Rc::new(load_article(&path)?);
+                let article = Rc::new(load_article(src_dir, &path)?);
                 for tag in article.tags.iter() {
                     if !articles.contains_key(tag.as_str()) {
                         articles.insert(tag.clone(), Vec::new());
@@ -46,7 +47,7 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
     Ok((articles, sorted_articles))
 }
 
-fn load_article(article_path: &PathBuf) -> Result<Article, Error> {
+fn load_article(src_dir: &PathBuf, article_path: &PathBuf) -> Result<Article, Error> {
     let mut file = File::open(article_path)?;
     let mut source = String::new();
     file.read_to_string(&mut source)?;
@@ -60,6 +61,11 @@ fn load_article(article_path: &PathBuf) -> Result<Article, Error> {
         tags: tags,
         body: body,
         html: html,
+        path: PathBuf::from("/").join(
+            article_path
+                .strip_prefix(src_dir.join("articles/"))?
+                .to_path_buf(),
+        ),
     })
 }
 

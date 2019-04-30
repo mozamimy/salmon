@@ -57,8 +57,8 @@ fn main() {
                     "{:?}",
                     blog.sorted_articles
                         .iter()
-                        .map(|a| a.date)
-                        .collect::<Vec<chrono::NaiveDate>>()
+                        .map(|a| &a.path)
+                        .collect::<Vec<&std::path::PathBuf>>()
                 ),
                 Err(e) => {
                     println!(
