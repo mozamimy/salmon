@@ -10,6 +10,7 @@ pub mod blog;
 pub mod converter;
 pub mod layout;
 pub mod page;
+pub mod partial;
 pub mod resource;
 
 use crate::blog::Blog;
@@ -52,13 +53,7 @@ fn main() {
 
             let init_blog_result = Blog::init(src_dir, dest_dir);
             match init_blog_result {
-                Ok(blog) => println!(
-                    "{:?}",
-                    blog.sorted_articles
-                        .iter()
-                        .map(|a| a.date)
-                        .collect::<Vec<chrono::Date<chrono::Utc>>>()
-                ),
+                Ok(blog) => println!("{:?}", blog.partials),
                 Err(e) => {
                     println!(
                         "An error is occured while loading components.\n{:?}\nexit.",
