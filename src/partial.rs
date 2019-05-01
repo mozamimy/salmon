@@ -5,8 +5,8 @@ use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct Partial {
-    name: String,
-    template: String,
+    pub name: String,
+    pub template: String,
 }
 
 pub fn load_partials(src_dir: &PathBuf) -> Result<Vec<Partial>, Error> {

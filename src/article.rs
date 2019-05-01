@@ -1,12 +1,13 @@
 use crate::converter;
 use failure::Error;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Article {
     title: String,
     date: chrono::NaiveDate,
@@ -25,7 +26,6 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
     let article_dir_glob = glob::glob(&src_dir.join("articles/**/*.md").to_str().unwrap())?;
 
     for entry in article_dir_glob {
-        println!("{:?}", entry);
         match entry {
             Ok(path) => {
                 let article = Rc::new(load_article(src_dir, &path)?);
@@ -37,13 +37,13 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
                         .get_mut(tag.as_str())
                         .unwrap()
                         .push(article.clone());
-                    sorted_articles.push(article.clone());
                 }
+                sorted_articles.push(article.clone());
             }
             Err(e) => return Err(format_err!("{:?}", e)),
         }
     }
-    sorted_articles.sort_by_key(|a| a.date);
+    sorted_articles.sort_by_key(|a| std::cmp::Reverse(a.date));
     Ok((articles, sorted_articles))
 }
 
@@ -138,6 +138,7 @@ fn decompose_source(
             }
             _ => {
                 body.push_str(line);
+                body.push_str("\n");
             }
         }
         line_number += 1;

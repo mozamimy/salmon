@@ -15,12 +15,12 @@ pub enum Layout {
 
 #[derive(Debug)]
 pub struct Layouts {
-    index: Layout,
-    article: Layout,
-    tag: Layout,
-    year: Layout,
-    page: Layout,
-    rss: Layout,
+    pub index: Layout,
+    pub article: Layout,
+    pub tag: Layout,
+    pub year: Layout,
+    pub page: Layout,
+    pub rss: Layout,
 }
 
 pub fn load_layouts(src_dir: &PathBuf) -> Result<Layouts, Error> {

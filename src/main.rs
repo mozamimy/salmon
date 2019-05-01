@@ -3,15 +3,22 @@ extern crate clap;
 #[macro_use]
 extern crate failure;
 extern crate glob;
+extern crate handlebars;
 extern crate pulldown_cmark;
+extern crate serde;
+extern crate serde_derive;
+#[macro_use]
+extern crate serde_json;
 
 pub mod article;
 pub mod blog;
 pub mod converter;
 pub mod layout;
 pub mod page;
+pub mod paginator;
 pub mod partial;
 pub mod resource;
+pub mod view_helper;
 
 use crate::blog::Blog;
 
@@ -53,15 +60,9 @@ fn main() {
 
             let init_blog_result = Blog::init(src_dir, dest_dir);
             match init_blog_result {
-                Ok(blog) => println!(
-                    "{:?}",
-                    blog.sorted_articles
-                        .iter()
-                        .map(|a| &a.path)
-                        .collect::<Vec<&std::path::PathBuf>>()
-                ),
+                Ok(blog) => blog.build().unwrap(),
                 Err(e) => {
-                    println!(
+                    eprintln!(
                         "An error is occured while loading components.\n{:?}\nexit.",
                         e
                     );
