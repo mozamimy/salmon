@@ -64,6 +64,7 @@ fn load_article(src_dir: &PathBuf, article_path: &PathBuf) -> Result<Article, Er
         path: PathBuf::from("/").join(
             article_path
                 .strip_prefix(src_dir.join("articles/"))?
+                .with_extension("html")
                 .to_path_buf(),
         ),
     })

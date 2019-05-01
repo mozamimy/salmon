@@ -39,23 +39,23 @@ fn load_index(src_dir: &PathBuf) -> Result<Layout, Error> {
 }
 
 fn load_article(src_dir: &PathBuf) -> Result<Layout, Error> {
-    Ok(Layout::Index(load_file(src_dir, "article.hbs")?))
+    Ok(Layout::Article(load_file(src_dir, "article.hbs")?))
 }
 
 fn load_tag(src_dir: &PathBuf) -> Result<Layout, Error> {
-    Ok(Layout::Index(load_file(src_dir, "tag.hbs")?))
+    Ok(Layout::Tag(load_file(src_dir, "tag.hbs")?))
 }
 
 fn load_year(src_dir: &PathBuf) -> Result<Layout, Error> {
-    Ok(Layout::Index(load_file(src_dir, "year.hbs")?))
+    Ok(Layout::Year(load_file(src_dir, "year.hbs")?))
 }
 
 fn load_page(src_dir: &PathBuf) -> Result<Layout, Error> {
-    Ok(Layout::Index(load_file(src_dir, "page.hbs")?))
+    Ok(Layout::Page(load_file(src_dir, "page.hbs")?))
 }
 
 fn load_rss(src_dir: &PathBuf) -> Result<Layout, Error> {
-    Ok(Layout::Index(load_file(src_dir, "rss.hbs")?))
+    Ok(Layout::Rss(load_file(src_dir, "rss.hbs")?))
 }
 
 fn load_file(src_dir: &PathBuf, file_name: &str) -> Result<String, Error> {

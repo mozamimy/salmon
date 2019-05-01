@@ -20,6 +20,8 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
 
+type ViewItems = std::vec::Vec<serde_json::Map<std::string::String, handlebars::JsonValue>>;
+
 #[derive(Debug)]
 pub struct Blog {
     src_dir: std::path::PathBuf,
@@ -55,49 +57,27 @@ impl Blog {
     }
 
     pub fn build(&self) -> Result<(), Error> {
-        self.build_index_page()?;
+        let renderer = self.init_renderer()?;
+        let tags = self.init_tags();
+        let years = self.init_years();
+        self.build_index_page(&renderer, &tags, &years)?;
+        self.build_article_page(&renderer, &tags, &years)?;
         self.put_resources()?;
         Ok(())
     }
 
-    fn build_index_page(&self) -> Result<(), Error> {
-        let mut renderer = Handlebars::new();
-        renderer.register_escape_fn(handlebars::no_escape);
-
+    fn build_index_page(
+        &self,
+        renderer: &Handlebars,
+        tags: &ViewItems,
+        years: &ViewItems,
+    ) -> Result<(), Error> {
         let template_string = match &self.layouts.index {
             Layout::Index(s) => s,
             _ => return Err(format_err!("Invalid Layout variant.")),
         };
-        for ref p in self.partials.iter() {
-            renderer.register_partial(p.name.as_str(), p.template.as_str())?;
-        }
-        renderer.register_helper(
-            "convert_to_iso8601",
-            Box::new(view_helper::convert_to_iso8601),
-        );
 
         std::fs::create_dir_all(self.dest_dir.join("page"))?;
-
-        let mut tag_keys: Vec<_> = self.articles_by_tag.keys().collect();
-        tag_keys.sort();
-        let mut tags = Vec::new();
-        for tag_key in tag_keys {
-            let mut m = Map::new();
-            m.insert("key".to_string(), json!(tag_key));
-            m.insert(
-                "len".to_string(),
-                json!(self.articles_by_tag.get(tag_key).unwrap().len()),
-            );
-            tags.push(m);
-        }
-
-        let mut years = Vec::new();
-        for (year, group) in &self.sorted_articles.iter().group_by(|a| a.date.year()) {
-            let mut m = Map::new();
-            m.insert("year".to_string(), json!(year));
-            m.insert("len".to_string(), json!(group.count()));
-            years.push(m);
-        }
 
         let paginator = Paginator::new(&self.sorted_articles, 10);
         let num_pages = paginator.len();
@@ -136,18 +116,45 @@ impl Blog {
         Ok(())
     }
 
+    fn build_article_page(
+        &self,
+        renderer: &Handlebars,
+        tags: &ViewItems,
+        years: &ViewItems,
+    ) -> Result<(), Error> {
+        let template_string = match &self.layouts.article {
+            Layout::Article(s) => s,
+            _ => return Err(format_err!("Invalid Layout variant.")),
+        };
+
+        for article in self.sorted_articles.iter() {
+            let mut data = Map::new();
+            data.insert("article".to_string(), handlebars::to_json(&article));
+            data.insert("tags".to_string(), handlebars::to_json(&tags));
+            data.insert("years".to_string(), handlebars::to_json(&years));
+
+            let html = renderer.render_template(template_string.as_str(), &data)?;
+            let dest_full_path = self.dest_dir.join(&article.path.strip_prefix("/")?);
+            std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
+            let mut file = File::create(dest_full_path)?;
+            file.write_all(html.as_bytes())?;
+        }
+
+        Ok(())
+    }
+
     fn put_resources(&self) -> Result<(), Error> {
         for resource in self.resources.iter() {
             match resource {
                 Resource::StyleSheet(r) => {
                     let dest_full_path = self.dest_dir.join(&r.dest_path);
-                    std::fs::create_dir_all(self.build_dest_dir(&dest_full_path)?)?;
+                    std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
                     let mut file = File::create(dest_full_path)?;
                     file.write_all(r.compiled.as_bytes())?;
                 }
                 Resource::General(r) => {
                     let dest_full_path = self.dest_dir.join(&r.dest_path);
-                    std::fs::create_dir_all(self.build_dest_dir(&dest_full_path)?)?;
+                    std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
                     std::fs::copy(&r.src_path, dest_full_path)?;
                 }
             }
@@ -156,7 +163,50 @@ impl Blog {
         Ok(())
     }
 
-    fn build_dest_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
+    fn init_renderer(&self) -> Result<Handlebars, Error> {
+        let mut renderer = Handlebars::new();
+        renderer.register_escape_fn(handlebars::no_escape);
+
+        for ref p in self.partials.iter() {
+            renderer.register_partial(p.name.as_str(), p.template.as_str())?;
+        }
+
+        renderer.register_helper(
+            "convert_to_iso8601",
+            Box::new(view_helper::convert_to_iso8601),
+        );
+
+        Ok(renderer)
+    }
+
+    fn init_tags(&self) -> ViewItems {
+        let mut tag_keys: Vec<_> = self.articles_by_tag.keys().collect();
+        tag_keys.sort();
+        let mut tags = Vec::new();
+        for tag_key in tag_keys {
+            let mut m = Map::new();
+            m.insert("key".to_string(), json!(tag_key));
+            m.insert(
+                "len".to_string(),
+                json!(self.articles_by_tag.get(tag_key).unwrap().len()),
+            );
+            tags.push(m);
+        }
+        tags
+    }
+
+    fn init_years(&self) -> ViewItems {
+        let mut years = Vec::new();
+        for (year, group) in &self.sorted_articles.iter().group_by(|a| a.date.year()) {
+            let mut m = Map::new();
+            m.insert("year".to_string(), json!(year));
+            m.insert("len".to_string(), json!(group.count()));
+            years.push(m);
+        }
+        years
+    }
+
+    fn extract_parent_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
         Ok(dest_full_path
             .parent()
             .ok_or(format_err!("Directory not found"))?
