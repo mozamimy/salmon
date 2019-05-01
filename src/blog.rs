@@ -78,12 +78,25 @@ impl Blog {
 
         let paginator = Paginator::new(&self.sorted_articles, 10);
         let num_pages = paginator.len();
+        let mut tag_keys: Vec<_> = self.articles_by_tag.keys().collect();
+        tag_keys.sort();
+        let mut tags = Vec::new();
+        for tag_key in tag_keys {
+            let mut m = Map::new();
+            m.insert("key".to_string(), json!(tag_key));
+            m.insert(
+                "len".to_string(),
+                json!(self.articles_by_tag.get(tag_key).unwrap().len()),
+            );
+            tags.push(m);
+        }
         for (mut i, page) in paginator.enumerate() {
             // The page number seen from users is 1 origin.
             i += 1;
 
             let mut data = Map::new();
             data.insert("articles".to_string(), handlebars::to_json(&page));
+            data.insert("tags".to_string(), handlebars::to_json(&tags));
 
             let mut paginate = Map::new();
             paginate.insert("page_number".to_string(), json!(i));

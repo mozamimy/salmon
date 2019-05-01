@@ -118,8 +118,8 @@ fn decompose_source(
                     let v: Vec<&str> = trimmed_line.split(':').collect();
                     match v.get(1) {
                         Some(s) => {
-                            for tag in s.trim().split_whitespace() {
-                                tags.push(tag.to_string());
+                            for tag in s.trim().split(',') {
+                                tags.push(tag.trim().to_string());
                             }
                         }
                         None => {
