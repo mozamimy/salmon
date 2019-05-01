@@ -4,6 +4,7 @@ extern crate clap;
 extern crate failure;
 extern crate glob;
 extern crate handlebars;
+extern crate itertools;
 extern crate pulldown_cmark;
 extern crate serde;
 extern crate serde_derive;

@@ -10,8 +10,10 @@ use crate::partial::Partial;
 use crate::resource::load_resources;
 use crate::resource::Resource;
 use crate::view_helper;
+use chrono::Datelike;
 use failure::Error;
 use handlebars::Handlebars;
+use itertools::Itertools;
 use serde_json::value::Map;
 use std::fs::File;
 use std::io::prelude::*;
@@ -76,8 +78,6 @@ impl Blog {
 
         std::fs::create_dir_all(self.dest_dir.join("page"))?;
 
-        let paginator = Paginator::new(&self.sorted_articles, 10);
-        let num_pages = paginator.len();
         let mut tag_keys: Vec<_> = self.articles_by_tag.keys().collect();
         tag_keys.sort();
         let mut tags = Vec::new();
@@ -90,6 +90,17 @@ impl Blog {
             );
             tags.push(m);
         }
+
+        let mut years = Vec::new();
+        for (year, group) in &self.sorted_articles.iter().group_by(|a| a.date.year()) {
+            let mut m = Map::new();
+            m.insert("year".to_string(), json!(year));
+            m.insert("len".to_string(), json!(group.count()));
+            years.push(m);
+        }
+
+        let paginator = Paginator::new(&self.sorted_articles, 10);
+        let num_pages = paginator.len();
         for (mut i, page) in paginator.enumerate() {
             // The page number seen from users is 1 origin.
             i += 1;
@@ -97,6 +108,7 @@ impl Blog {
             let mut data = Map::new();
             data.insert("articles".to_string(), handlebars::to_json(&page));
             data.insert("tags".to_string(), handlebars::to_json(&tags));
+            data.insert("years".to_string(), handlebars::to_json(&years));
 
             let mut paginate = Map::new();
             paginate.insert("page_number".to_string(), json!(i));

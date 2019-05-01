@@ -10,7 +10,7 @@ use std::rc::Rc;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Article {
     title: String,
-    date: chrono::NaiveDate,
+    pub date: chrono::NaiveDate,
     tags: Vec<String>,
     body: String,
     html: String,
