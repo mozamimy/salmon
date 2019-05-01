@@ -9,15 +9,15 @@ pub enum Resource {
 
 #[derive(Debug)]
 pub struct GeneralResource {
-    src_path: PathBuf,
-    dest_path: PathBuf,
+    pub src_path: PathBuf,
+    pub dest_path: PathBuf,
 }
 
 #[derive(Debug)]
 pub struct Sass {
-    src_path: PathBuf,
-    dest_path: PathBuf,
-    compiled: String,
+    pub src_path: PathBuf,
+    pub dest_path: PathBuf,
+    pub compiled: String,
 }
 
 pub fn load_resources(src_dir: &PathBuf) -> Result<Vec<Resource>, Error> {

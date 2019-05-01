@@ -54,6 +54,7 @@ impl Blog {
 
     pub fn build(&self) -> Result<(), Error> {
         self.build_index_page()?;
+        self.put_resources()?;
         Ok(())
     }
 
@@ -108,5 +109,32 @@ impl Blog {
         }
 
         Ok(())
+    }
+
+    fn put_resources(&self) -> Result<(), Error> {
+        for resource in self.resources.iter() {
+            match resource {
+                Resource::StyleSheet(r) => {
+                    let dest_full_path = self.dest_dir.join(&r.dest_path);
+                    std::fs::create_dir_all(self.build_dest_dir(&dest_full_path)?)?;
+                    let mut file = File::create(dest_full_path)?;
+                    file.write_all(r.compiled.as_bytes())?;
+                }
+                Resource::General(r) => {
+                    let dest_full_path = self.dest_dir.join(&r.dest_path);
+                    std::fs::create_dir_all(self.build_dest_dir(&dest_full_path)?)?;
+                    std::fs::copy(&r.src_path, dest_full_path)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn build_dest_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
+        Ok(dest_full_path
+            .parent()
+            .ok_or(format_err!("Directory not found"))?
+            .to_path_buf())
     }
 }
