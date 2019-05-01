@@ -24,11 +24,11 @@ pub struct Blog {
     dest_dir: std::path::PathBuf,
 
     articles_by_tag: ArticlesByTag,
-    pub sorted_articles: Vec<Rc<Article>>,
+    sorted_articles: Vec<Rc<Article>>,
     layouts: Layouts,
     partials: Vec<Partial>,
     pages: Vec<Page>,
-    resources: Vec<Resource>,
+    pub resources: Vec<Resource>,
 }
 
 impl Blog {

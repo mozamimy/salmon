@@ -60,7 +60,10 @@ fn main() {
 
             let init_blog_result = Blog::init(src_dir, dest_dir);
             match init_blog_result {
-                Ok(blog) => blog.build().unwrap(),
+                Ok(blog) => {
+                    println!("{:?}", &blog.resources);
+                    blog.build().unwrap()
+                }
                 Err(e) => {
                     eprintln!(
                         "An error is occured while loading components.\n{:?}\nexit.",
