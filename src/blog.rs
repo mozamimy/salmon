@@ -10,10 +10,8 @@ use crate::partial::Partial;
 use crate::resource::load_resources;
 use crate::resource::Resource;
 use crate::view_helper;
-use chrono::Datelike;
 use failure::Error;
 use handlebars::Handlebars;
-use itertools::Itertools;
 use serde_json::value::Map;
 use std::fs::File;
 use std::io::prelude::*;
@@ -28,6 +26,7 @@ pub struct Blog {
     dest_dir: std::path::PathBuf,
 
     articles_by_tag: ArticlesByTag,
+    articles_by_year: ArticlesByYear,
     sorted_articles: Vec<Rc<Article>>,
     layouts: Layouts,
     partials: Vec<Partial>,
@@ -37,7 +36,7 @@ pub struct Blog {
 
 impl Blog {
     pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Result<Self, Error> {
-        let (articles_by_tag, sorted_articles) = load_articles(&src_dir)?;
+        let (articles_by_tag, articles_by_year, sorted_articles) = load_articles(&src_dir)?;
         let layouts = load_layouts(&src_dir)?;
         let partials = load_partials(&src_dir)?;
         let pages = load_pages(&src_dir)?;
@@ -48,6 +47,7 @@ impl Blog {
             dest_dir: dest_dir,
 
             articles_by_tag: articles_by_tag,
+            articles_by_year: articles_by_year,
             sorted_articles: sorted_articles,
             layouts: layouts,
             partials: partials,
@@ -64,6 +64,7 @@ impl Blog {
         self.build_index_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_article_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
+        // self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
         self.put_resources()?;
         Ok(())
     }
@@ -229,6 +230,22 @@ impl Blog {
         Ok(())
     }
 
+    // fn build_year_page(
+    //     &self,
+    //     renderer: &Handlebars,
+    //     tags: &ViewItems,
+    //     years: &ViewItems,
+    //     recent_articles: &[Rc<Article>],
+    // ) -> Result<(), Error> {
+    //     let template_string = match &self.layouts.year {
+    //         Layout::Year(s) => s,
+    //         _ => return Err(format_err!("Invalid Layout variant.")),
+    //     };
+
+    //     for
+    //     Ok(())
+    // }
+
     fn put_resources(&self) -> Result<(), Error> {
         for resource in self.resources.iter() {
             match resource {
@@ -283,10 +300,10 @@ impl Blog {
 
     fn init_years(&self) -> ViewItems {
         let mut years = Vec::new();
-        for (year, group) in &self.sorted_articles.iter().group_by(|a| a.date.year()) {
+        for (year, articles) in &self.articles_by_year {
             let mut m = Map::new();
             m.insert("year".to_string(), json!(year));
-            m.insert("len".to_string(), json!(group.count()));
+            m.insert("len".to_string(), json!(articles.len()));
             years.push(m);
         }
         years

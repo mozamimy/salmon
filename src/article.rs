@@ -1,4 +1,5 @@
 use crate::converter;
+use chrono::Datelike;
 use failure::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -18,9 +19,13 @@ pub struct Article {
 }
 
 pub type ArticlesByTag = HashMap<String, Vec<Rc<Article>>>;
+pub type ArticlesByYear = HashMap<i32, Vec<Rc<Article>>>;
 
-pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article>>), Error> {
-    let mut articles = ArticlesByTag::new();
+pub fn load_articles(
+    src_dir: &PathBuf,
+) -> Result<(ArticlesByTag, ArticlesByYear, Vec<Rc<Article>>), Error> {
+    let mut articles_by_tag = ArticlesByTag::new();
+    let mut articles_by_year = ArticlesByYear::new();
     let mut sorted_articles = Vec::new();
 
     let article_dir_glob = glob::glob(&src_dir.join("articles/**/*.md").to_str().unwrap())?;
@@ -30,24 +35,32 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
             Ok(path) => {
                 let article = Rc::new(load_article(src_dir, &path)?);
                 for tag in article.tags.iter() {
-                    if !articles.contains_key(tag.as_str()) {
-                        articles.insert(tag.clone(), Vec::new());
+                    if !articles_by_tag.contains_key(tag.as_str()) {
+                        articles_by_tag.insert(tag.clone(), Vec::new());
                     }
-                    articles
+                    articles_by_tag
                         .get_mut(tag.as_str())
                         .unwrap()
                         .push(article.clone());
                 }
+                let article_year = article.date.year();
+                if !articles_by_year.contains_key(&article_year) {
+                    articles_by_year.insert(article_year, Vec::new());
+                }
+                articles_by_year
+                    .get_mut(&article_year)
+                    .unwrap()
+                    .push(article.clone());
                 sorted_articles.push(article.clone());
             }
             Err(e) => return Err(format_err!("{:?}", e)),
         }
     }
     sorted_articles.sort_by_key(|a| std::cmp::Reverse(a.date));
-    for (_, articles) in articles.iter_mut() {
+    for (_, articles) in articles_by_tag.iter_mut() {
         articles.sort_by_key(|a| std::cmp::Reverse(a.date));
     }
-    Ok((articles, sorted_articles))
+    Ok((articles_by_tag, articles_by_year, sorted_articles))
 }
 
 fn load_article(src_dir: &PathBuf, article_path: &PathBuf) -> Result<Article, Error> {
