@@ -60,6 +60,9 @@ pub fn load_articles(
     for (_, articles) in articles_by_tag.iter_mut() {
         articles.sort_by_key(|a| std::cmp::Reverse(a.date));
     }
+    for (_, articles) in articles_by_year.iter_mut() {
+        articles.sort_by_key(|a| std::cmp::Reverse(a.date));
+    }
     Ok((articles_by_tag, articles_by_year, sorted_articles))
 }
 

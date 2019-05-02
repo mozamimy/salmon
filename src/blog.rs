@@ -64,7 +64,7 @@ impl Blog {
         self.build_index_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_article_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
-        // self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
+        self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
         self.put_resources()?;
         Ok(())
     }
@@ -230,21 +230,73 @@ impl Blog {
         Ok(())
     }
 
-    // fn build_year_page(
-    //     &self,
-    //     renderer: &Handlebars,
-    //     tags: &ViewItems,
-    //     years: &ViewItems,
-    //     recent_articles: &[Rc<Article>],
-    // ) -> Result<(), Error> {
-    //     let template_string = match &self.layouts.year {
-    //         Layout::Year(s) => s,
-    //         _ => return Err(format_err!("Invalid Layout variant.")),
-    //     };
+    fn build_year_page(
+        &self,
+        renderer: &Handlebars,
+        tags: &ViewItems,
+        years: &ViewItems,
+        recent_articles: &[Rc<Article>],
+    ) -> Result<(), Error> {
+        let template_string = match &self.layouts.year {
+            Layout::Year(s) => s,
+            _ => return Err(format_err!("Invalid Layout variant.")),
+        };
 
-    //     for
-    //     Ok(())
-    // }
+        for (year, articles) in self.articles_by_year.iter() {
+            let mut data = Map::new();
+            data.insert("tags".to_string(), handlebars::to_json(tags));
+            data.insert("years".to_string(), handlebars::to_json(years));
+            data.insert("year_num".to_string(), handlebars::to_json(year));
+            data.insert(
+                "recent_articles".to_string(),
+                handlebars::to_json(recent_articles),
+            );
+            let paginator = Paginator::new(&articles, 15);
+            let num_pages = paginator.len();
+            for (mut i, page) in paginator.enumerate() {
+                // The page number seen from users is 1 origin.
+                i += 1;
+
+                data.insert("articles".to_string(), handlebars::to_json(page));
+
+                let mut paginate = Map::new();
+                paginate.insert("page_number".to_string(), json!(i));
+                paginate.insert("num_pages".to_string(), json!(num_pages));
+                if i > 1 {
+                    if i == 2 {
+                        paginate.insert("prev_page".to_string(), json!(format!("/{}.html", year)));
+                    } else {
+                        paginate.insert(
+                            "prev_page".to_string(),
+                            json!(format!("/{}/page/{}.html", year, i - 1)),
+                        );
+                    }
+                }
+                if i < num_pages {
+                    paginate.insert(
+                        "next_page".to_string(),
+                        json!(format!("/{}/page/{}.html", year, i + 1)),
+                    );
+                }
+                data.insert("paginate".to_string(), handlebars::to_json(&paginate));
+
+                let html = renderer.render_template(template_string.as_str(), &data)?;
+                let dest_full_path = if i == 1 {
+                    self.dest_dir.join(&year.to_string()).with_extension("html")
+                } else {
+                    self.dest_dir
+                        .join(&year.to_string())
+                        .join("page")
+                        .join(&i.to_string())
+                        .with_extension("html")
+                };
+                std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
+                let mut file = File::create(dest_full_path)?;
+                file.write_all(html.as_bytes())?;
+            }
+        }
+        Ok(())
+    }
 
     fn put_resources(&self) -> Result<(), Error> {
         for resource in self.resources.iter() {
@@ -306,6 +358,13 @@ impl Blog {
             m.insert("len".to_string(), json!(articles.len()));
             years.push(m);
         }
+        years.sort_by(|v, u| {
+            if v.get("year").unwrap().as_u64().unwrap() > u.get("year").unwrap().as_u64().unwrap() {
+                std::cmp::Ordering::Less
+            } else {
+                std::cmp::Ordering::Greater
+            }
+        });
         years
     }
 
