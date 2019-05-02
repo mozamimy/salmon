@@ -44,6 +44,9 @@ pub fn load_articles(src_dir: &PathBuf) -> Result<(ArticlesByTag, Vec<Rc<Article
         }
     }
     sorted_articles.sort_by_key(|a| std::cmp::Reverse(a.date));
+    for (_, articles) in articles.iter_mut() {
+        articles.sort_by_key(|a| std::cmp::Reverse(a.date));
+    }
     Ok((articles, sorted_articles))
 }
 

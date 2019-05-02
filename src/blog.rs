@@ -62,6 +62,7 @@ impl Blog {
         let years = self.init_years();
         self.build_index_page(&renderer, &tags, &years)?;
         self.build_article_page(&renderer, &tags, &years)?;
+        self.build_tag_page(&renderer, &tags, &years)?;
         self.put_resources()?;
         Ok(())
     }
@@ -138,6 +139,75 @@ impl Blog {
             std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
             let mut file = File::create(dest_full_path)?;
             file.write_all(html.as_bytes())?;
+        }
+
+        Ok(())
+    }
+
+    fn build_tag_page(
+        &self,
+        renderer: &Handlebars,
+        tags: &ViewItems,
+        years: &ViewItems,
+    ) -> Result<(), Error> {
+        let template_string = match &self.layouts.tag {
+            Layout::Tag(s) => s,
+            _ => return Err(format_err!("Invalid Layout variant.")),
+        };
+
+        for (tag, articles) in self.articles_by_tag.iter() {
+            let mut data = Map::new();
+            data.insert("tags".to_string(), handlebars::to_json(&tags));
+            data.insert("years".to_string(), handlebars::to_json(&years));
+            data.insert("tag_name".to_string(), handlebars::to_json(&tag));
+
+            let paginator = Paginator::new(&articles, 15);
+            let num_pages = paginator.len();
+            for (mut i, page) in paginator.enumerate() {
+                // The page number seen from users is 1 origin.
+                i += 1;
+
+                data.insert("articles".to_string(), handlebars::to_json(page));
+
+                let mut paginate = Map::new();
+                paginate.insert("page_number".to_string(), json!(i));
+                paginate.insert("num_pages".to_string(), json!(num_pages));
+                if i > 1 {
+                    if i == 2 {
+                        paginate.insert(
+                            "prev_page".to_string(),
+                            json!(format!("/tags/{}.html", tag)),
+                        );
+                    } else {
+                        paginate.insert(
+                            "prev_page".to_string(),
+                            json!(format!("/tags/{}/page/{}.html", tag, i - 1)),
+                        );
+                    }
+                }
+                if i < num_pages {
+                    paginate.insert(
+                        "next_page".to_string(),
+                        json!(format!("/tags/{}/page/{}.html", tag, i + 1)),
+                    );
+                }
+                data.insert("paginate".to_string(), handlebars::to_json(&paginate));
+
+                let html = renderer.render_template(template_string.as_str(), &data)?;
+                let dest_full_path = if i == 1 {
+                    self.dest_dir.join("tags").join(&tag).with_extension("html")
+                } else {
+                    self.dest_dir
+                        .join("tags")
+                        .join(&tag)
+                        .join("page")
+                        .join(&i.to_string())
+                        .with_extension("html")
+                };
+                std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
+                let mut file = File::create(dest_full_path)?;
+                file.write_all(html.as_bytes())?;
+            }
         }
 
         Ok(())
