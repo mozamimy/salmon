@@ -1,12 +1,13 @@
 use crate::converter;
 use failure::Error;
+use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Page {
-    path: PathBuf,
+    pub path: PathBuf,
     body: String,
     html: String,
 }

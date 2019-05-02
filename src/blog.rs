@@ -65,6 +65,7 @@ impl Blog {
         self.build_article_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
+        self.build_general_page(&renderer)?;
         self.put_resources()?;
         Ok(())
     }
@@ -295,6 +296,26 @@ impl Blog {
                 file.write_all(html.as_bytes())?;
             }
         }
+        Ok(())
+    }
+
+    fn build_general_page(&self, renderer: &Handlebars) -> Result<(), Error> {
+        let template_string = match &self.layouts.page {
+            Layout::Page(s) => s,
+            _ => return Err(format_err!("Invalid Layout variant.")),
+        };
+
+        for page in self.pages.iter() {
+            let mut data = Map::new();
+            data.insert("page".to_string(), handlebars::to_json(page));
+
+            let html = renderer.render_template(template_string.as_str(), &data)?;
+            let dest_full_path = self.dest_dir.join(&page.path).with_extension("html");
+            std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
+            let mut file = File::create(dest_full_path)?;
+            file.write_all(html.as_bytes())?;
+        }
+
         Ok(())
     }
 
