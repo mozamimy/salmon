@@ -60,9 +60,10 @@ impl Blog {
         let renderer = self.init_renderer()?;
         let tags = self.init_tags();
         let years = self.init_years();
-        self.build_index_page(&renderer, &tags, &years)?;
-        self.build_article_page(&renderer, &tags, &years)?;
-        self.build_tag_page(&renderer, &tags, &years)?;
+        let recent_articles = self.init_recent_articles();
+        self.build_index_page(&renderer, &tags, &years, &recent_articles)?;
+        self.build_article_page(&renderer, &tags, &years, &recent_articles)?;
+        self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
         self.put_resources()?;
         Ok(())
     }
@@ -72,6 +73,7 @@ impl Blog {
         renderer: &Handlebars,
         tags: &ViewItems,
         years: &ViewItems,
+        recent_articles: &[Rc<Article>],
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.index {
             Layout::Index(s) => s,
@@ -88,8 +90,12 @@ impl Blog {
 
             let mut data = Map::new();
             data.insert("articles".to_string(), handlebars::to_json(&page));
-            data.insert("tags".to_string(), handlebars::to_json(&tags));
-            data.insert("years".to_string(), handlebars::to_json(&years));
+            data.insert("tags".to_string(), handlebars::to_json(tags));
+            data.insert("years".to_string(), handlebars::to_json(years));
+            data.insert(
+                "recent_articles".to_string(),
+                handlebars::to_json(recent_articles),
+            );
 
             let mut paginate = Map::new();
             paginate.insert("page_number".to_string(), json!(i));
@@ -122,6 +128,7 @@ impl Blog {
         renderer: &Handlebars,
         tags: &ViewItems,
         years: &ViewItems,
+        recent_articles: &[Rc<Article>],
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.article {
             Layout::Article(s) => s,
@@ -131,8 +138,12 @@ impl Blog {
         for article in self.sorted_articles.iter() {
             let mut data = Map::new();
             data.insert("article".to_string(), handlebars::to_json(&article));
-            data.insert("tags".to_string(), handlebars::to_json(&tags));
-            data.insert("years".to_string(), handlebars::to_json(&years));
+            data.insert("tags".to_string(), handlebars::to_json(tags));
+            data.insert("years".to_string(), handlebars::to_json(years));
+            data.insert(
+                "recent_articles".to_string(),
+                handlebars::to_json(recent_articles),
+            );
 
             let html = renderer.render_template(template_string.as_str(), &data)?;
             let dest_full_path = self.dest_dir.join(&article.path.strip_prefix("/")?);
@@ -149,6 +160,7 @@ impl Blog {
         renderer: &Handlebars,
         tags: &ViewItems,
         years: &ViewItems,
+        recent_articles: &[Rc<Article>],
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.tag {
             Layout::Tag(s) => s,
@@ -157,9 +169,13 @@ impl Blog {
 
         for (tag, articles) in self.articles_by_tag.iter() {
             let mut data = Map::new();
-            data.insert("tags".to_string(), handlebars::to_json(&tags));
-            data.insert("years".to_string(), handlebars::to_json(&years));
+            data.insert("tags".to_string(), handlebars::to_json(tags));
+            data.insert("years".to_string(), handlebars::to_json(years));
             data.insert("tag_name".to_string(), handlebars::to_json(&tag));
+            data.insert(
+                "recent_articles".to_string(),
+                handlebars::to_json(recent_articles),
+            );
 
             let paginator = Paginator::new(&articles, 15);
             let num_pages = paginator.len();
@@ -274,6 +290,10 @@ impl Blog {
             years.push(m);
         }
         years
+    }
+
+    fn init_recent_articles(&self) -> &[Rc<Article>] {
+        &self.sorted_articles[0..=10]
     }
 
     fn extract_parent_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
