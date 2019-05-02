@@ -351,6 +351,10 @@ impl Blog {
             "convert_to_iso8601",
             Box::new(view_helper::convert_to_iso8601),
         );
+        renderer.register_helper(
+            "article_ogp_meta_tags",
+            Box::new(view_helper::article_ogp_meta_tags),
+        );
 
         Ok(renderer)
     }
