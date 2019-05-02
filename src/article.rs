@@ -14,7 +14,7 @@ pub struct Article {
     pub date: chrono::NaiveDate,
     tags: Vec<String>,
     body: String,
-    html: String,
+    pub html: String,
     pub path: PathBuf,
 }
 

@@ -10,9 +10,11 @@ extern crate serde;
 extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
+extern crate syntect;
 
 pub mod article;
 pub mod blog;
+pub mod code;
 pub mod converter;
 pub mod layout;
 pub mod page;

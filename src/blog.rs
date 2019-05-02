@@ -1,5 +1,7 @@
 use crate::article::ArticlesByTag;
 use crate::article::*;
+use crate::code::load_codes;
+use crate::code::Code;
 use crate::layout::load_layouts;
 use crate::layout::{Layout, Layouts};
 use crate::page::load_pages;
@@ -13,12 +15,13 @@ use crate::view_helper;
 use failure::Error;
 use handlebars::Handlebars;
 use serde_json::value::Map;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-type ViewItems = std::vec::Vec<serde_json::Map<std::string::String, handlebars::JsonValue>>;
+type ViewItems = std::vec::Vec<serde_json::Map<String, handlebars::JsonValue>>;
 
 #[derive(Debug)]
 pub struct Blog {
@@ -31,6 +34,7 @@ pub struct Blog {
     layouts: Layouts,
     partials: Vec<Partial>,
     pages: Vec<Page>,
+    codes: HashMap<PathBuf, Code>,
     pub resources: Vec<Resource>,
 }
 
@@ -40,6 +44,7 @@ impl Blog {
         let layouts = load_layouts(&src_dir)?;
         let partials = load_partials(&src_dir)?;
         let pages = load_pages(&src_dir)?;
+        let codes = load_codes(&src_dir)?;
         let resources = load_resources(&src_dir)?;
 
         Ok(Blog {
@@ -52,17 +57,18 @@ impl Blog {
             layouts: layouts,
             partials: partials,
             pages: pages,
+            codes: codes,
             resources: resources,
         })
     }
 
     pub fn build(&self) -> Result<(), Error> {
-        let renderer = self.init_renderer()?;
+        let mut renderer = self.init_renderer()?;
         let tags = self.init_tags();
         let years = self.init_years();
         let recent_articles = self.init_recent_articles();
         self.build_index_page(&renderer, &tags, &years, &recent_articles)?;
-        self.build_article_page(&renderer, &tags, &years, &recent_articles)?;
+        self.build_article_page(&mut renderer, &tags, &years, &recent_articles)?;
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_general_page(&renderer)?;
@@ -98,6 +104,7 @@ impl Blog {
                 "recent_articles".to_string(),
                 handlebars::to_json(recent_articles),
             );
+            data.insert("codes".to_string(), handlebars::to_json(&self.codes));
 
             let mut paginate = Map::new();
             paginate.insert("page_number".to_string(), json!(i));
@@ -127,7 +134,7 @@ impl Blog {
 
     fn build_article_page(
         &self,
-        renderer: &Handlebars,
+        renderer: &mut handlebars::Handlebars,
         tags: &ViewItems,
         years: &ViewItems,
         recent_articles: &[Rc<Article>],
@@ -146,7 +153,9 @@ impl Blog {
                 "recent_articles".to_string(),
                 handlebars::to_json(recent_articles),
             );
+            data.insert("codes".to_string(), handlebars::to_json(&self.codes));
 
+            renderer.register_partial("article_html", &article.html)?;
             let html = renderer.render_template(template_string.as_str(), &data)?;
             let dest_full_path = self.dest_dir.join(&article.path.strip_prefix("/")?);
             std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
@@ -355,6 +364,7 @@ impl Blog {
             "article_ogp_meta_tags",
             Box::new(view_helper::article_ogp_meta_tags),
         );
+        renderer.register_helper("embed_code", Box::new(view_helper::embed_code));
 
         Ok(renderer)
     }

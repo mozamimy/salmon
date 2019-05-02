@@ -90,3 +90,32 @@ pub fn article_ogp_meta_tags(
 
     Ok(())
 }
+
+pub fn embed_code(
+    h: &Helper,
+    _: &Handlebars,
+    ctx: &Context,
+    _: &mut RenderContext,
+    out: &mut Output,
+) -> Result<(), RenderError> {
+    let path = h
+        .param(0)
+        .and_then(|v| v.value().as_str())
+        .ok_or(RenderError::new(
+            "embed_code: Param 0 with string type is required.",
+        ))?;
+
+    match ctx.data().get("codes").unwrap().get(path) {
+        Some(code) => {
+            out.write(code.get("highlighted_html").unwrap().as_str().unwrap())?;
+        }
+        None => {
+            return Err(RenderError::new(format!(
+                "embed_code: There is no code source {}",
+                path
+            )))
+        }
+    }
+
+    Ok(())
+}
