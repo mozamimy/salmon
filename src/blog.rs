@@ -365,6 +365,10 @@ impl Blog {
             Box::new(view_helper::article_ogp_meta_tags),
         );
         renderer.register_helper("embed_code", Box::new(view_helper::embed_code));
+        renderer.register_helper(
+            "summarize_article",
+            Box::new(view_helper::summarize_article),
+        );
 
         Ok(renderer)
     }

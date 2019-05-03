@@ -119,3 +119,28 @@ pub fn embed_code(
 
     Ok(())
 }
+
+pub fn summarize_article(
+    h: &Helper,
+    _: &Handlebars,
+    _: &Context,
+    _: &mut RenderContext,
+    out: &mut Output,
+) -> Result<(), RenderError> {
+    let article = h
+        .param(0)
+        .and_then(|v| v.value().as_object())
+        .ok_or(RenderError::new(
+            "summarize_article: Param 0 with JSON object type is required.",
+        ))?;
+
+    let article_html = Html::parse_fragment(article.get("html").unwrap().as_str().unwrap());
+    let selector = Selector::parse("html > *").unwrap();
+
+    for p in article_html.select(&selector).take(4) {
+        // let paragraph_text = p.text().collect::<Vec<_>>().concat();
+        out.write(&p.html())?;
+    }
+
+    Ok(())
+}
