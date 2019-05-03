@@ -133,14 +133,33 @@ pub fn summarize_article(
         .ok_or(RenderError::new(
             "summarize_article: Param 0 with JSON object type is required.",
         ))?;
+    let is_escaped = h
+        .param(1)
+        .and_then(|v| v.value().as_bool())
+        .unwrap_or(false);
 
     let article_html = Html::parse_fragment(article.get("html").unwrap().as_str().unwrap());
     let selector = Selector::parse("html > *").unwrap();
 
     for p in article_html.select(&selector).take(4) {
-        // let paragraph_text = p.text().collect::<Vec<_>>().concat();
-        out.write(&p.html())?;
+        if is_escaped {
+            out.write(&handlebars::html_escape(&p.html()))?;
+        } else {
+            out.write(&p.html())?;
+        }
     }
 
+    Ok(())
+}
+
+pub fn time_now(
+    _: &Helper,
+    _: &Handlebars,
+    _: &Context,
+    _: &mut RenderContext,
+    out: &mut Output,
+) -> Result<(), RenderError> {
+    let now = chrono::Utc::now().to_rfc3339();
+    out.write(&now)?;
     Ok(())
 }

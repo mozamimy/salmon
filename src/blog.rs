@@ -72,6 +72,7 @@ impl Blog {
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_general_page(&renderer)?;
+        self.build_rss(&renderer)?;
         self.put_resources()?;
         Ok(())
     }
@@ -328,6 +329,25 @@ impl Blog {
         Ok(())
     }
 
+    fn build_rss(&self, renderer: &Handlebars) -> Result<(), Error> {
+        let template_string = match &self.layouts.rss {
+            Layout::Rss(s) => s,
+            _ => return Err(format_err!("Invalid Layout variant.")),
+        };
+
+        let mut data = Map::new();
+        data.insert(
+            "articles".to_string(),
+            handlebars::to_json(&self.sorted_articles[0..5]),
+        );
+
+        let html = renderer.render_template(&template_string, &data)?;
+        let mut file = File::create(self.dest_dir.join("feed.xml"))?;
+        file.write_all(html.as_bytes())?;
+
+        Ok(())
+    }
+
     fn put_resources(&self) -> Result<(), Error> {
         for resource in self.resources.iter() {
             match resource {
@@ -369,6 +389,7 @@ impl Blog {
             "summarize_article",
             Box::new(view_helper::summarize_article),
         );
+        renderer.register_helper("time_now", Box::new(view_helper::time_now));
 
         Ok(renderer)
     }
