@@ -1,0 +1,6 @@
+version: '3'
+services:
+  salmon:
+    build:
+      context: '.'
+    container_name: 'salmon'
