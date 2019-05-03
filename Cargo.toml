@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 authors = ["mozamimy <alice@mozami.me>"]
 repository = "https://github.com/mozamimy/salmon"
-license-file = "LICENSE"
+license-file = "LICENSE.txt"
 readme = "README.md"
 description = "(alpha version) A static site generator specialized for blogging and designed for rabbits. Not for human."
 
