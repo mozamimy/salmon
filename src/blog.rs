@@ -404,7 +404,7 @@ impl Blog {
     }
 
     fn init_recent_articles(&self) -> &[Rc<Article>] {
-        &self.sorted_articles[0..=10]
+        &self.sorted_articles[0..5]
     }
 
     fn extract_parent_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
