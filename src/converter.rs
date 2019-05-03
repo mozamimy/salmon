@@ -1,5 +1,7 @@
+use failure::Error;
 use pulldown_cmark::html;
 use pulldown_cmark::{Options, Parser};
+use std::path::PathBuf;
 
 pub fn convert_to_html(body: &str) -> String {
     let mut options = Options::empty();
@@ -13,11 +15,39 @@ pub fn convert_to_html(body: &str) -> String {
     built_html
 }
 
-pub fn highlight_code(content: &str, ext: &str) -> String {
+pub fn highlight_code(
+    content: &str,
+    ext: Option<&String>,
+    code_path: &PathBuf,
+) -> Result<String, Error> {
     let ss = syntect::parsing::SyntaxSet::load_defaults_newlines();
     let ts = syntect::highlighting::ThemeSet::load_defaults();
-    let sr = ss.find_syntax_by_token(ext).unwrap();
     let theme = &ts.themes["Solarized (light)"];
+    let sr = match ss.find_syntax_by_first_line(content) {
+        Some(s) => s,
+        None => {
+            if ext.is_none() {
+                eprintln!(
+                    "Cannot determine syntax for {:?}. Falling back to plain text mode.",
+                    code_path
+                );
+                ss.find_syntax_plain_text()
+            } else {
+                match ss.find_syntax_by_token(ext.unwrap()) {
+                    Some(s) => s,
+                    None => {
+                        eprintln!(
+                            "Cannot determine syntax for {:?}. Falling back to plain text mode.",
+                            code_path
+                        );
+                        ss.find_syntax_plain_text()
+                    }
+                }
+            }
+        }
+    };
 
-    syntect::html::highlighted_html_for_string(content, &ss, &sr, &theme)
+    Ok(syntect::html::highlighted_html_for_string(
+        content, &ss, &sr, &theme,
+    ))
 }
