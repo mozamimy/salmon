@@ -1,8 +1,12 @@
 [package]
 name = "salmon"
 version = "0.1.0"
-authors = ["mozamimy <alice@mozami.me>"]
 edition = "2018"
+authors = ["mozamimy <alice@mozami.me>"]
+repository = "https://github.com/mozamimy/salmon"
+license-file = "LICENSE"
+readme = "README.md"
+description = "(alpha version) A static site generator specialized for blogging and designed for rabbits. Not for human."
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
