@@ -61,7 +61,16 @@ fn main() {
                 dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
             }
 
-            let init_blog_result = Blog::init(src_dir, dest_dir);
+            let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
+                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                std::process::exit(1)
+            });
+            let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
+                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                std::process::exit(1)
+            });
+
+            let init_blog_result = Blog::init(canonicalized_src_dir, canonicalized_dest_dir);
             match init_blog_result {
                 Ok(blog) => blog.build().unwrap(),
                 Err(e) => {
