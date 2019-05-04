@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: 'rust:1.34-stretch'
+    steps:
+      - 'checkout'
+      - run:
+          name: 'Prepare tools to test'
+          command: |
+            rustup component add rustfmt
+
+      - run:
+          name: 'Check format'
+          command: |
+            cargo fmt -- --check
+      - restore_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}'
+      - run:
+          name: 'Build'
+          command: |
+            cargo build
+      - save_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}'
+          paths:
+            - '/usr/local/cargo/registry'
+            - 'target/'
+      - run:
+          name: 'Test'
+          command: |
+            cargo test
