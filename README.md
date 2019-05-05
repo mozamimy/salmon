@@ -1,5 +1,7 @@
 # Salmon
 
+[![CircleCI](https://circleci.com/gh/mozamimy/salmon.svg?style=svg)](https://circleci.com/gh/mozamimy/salmon)
+
 A static site generator specialized for blogging and designed for rabbits. Not for human.
 
 ## Installation
