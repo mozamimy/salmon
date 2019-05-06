@@ -75,32 +75,24 @@ workflows:
     jobs:
       - prepare:
           filters:
-            branches:
-              only: '/.*/'
             tags:
               only: '/.*/'
       - lint:
           requires:
             - 'prepare'
           filters:
-            branches:
-              only: '/.*/'
             tags:
               only: '/.*/'
       - build:
           requires:
             - 'prepare'
           filters:
-            branches:
-              only: '/.*/'
             tags:
               only: '/.*/'
       - test:
           requires:
             - 'build'
           filters:
-            branches:
-              only: '/.*/'
             tags:
               only: '/.*/'
       - release:
@@ -108,7 +100,6 @@ workflows:
             - 'test'
           filters:
             branches:
-              ignore:
-                - '/.*/'
+              ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
