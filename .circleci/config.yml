@@ -39,7 +39,7 @@ jobs:
           at: '/'
       - restore_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
-      - run: 'cargo build <<# parameters.release >>--release<</ parameters.release>>'
+      - run: 'cargo build <<# parameters.release >>--release --locked<</ parameters.release>>'
       - save_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
           paths:
@@ -55,7 +55,7 @@ jobs:
     steps:
       - attach_workspace:
           at: '/'
-      - run: 'cargo test <<# parameters.release >>--release<</ parameters.release>>'
+      - run: 'cargo test <<# parameters.release >>--release --locked<</ parameters.release>>'
   release:
     executor: 'default'
     steps:
