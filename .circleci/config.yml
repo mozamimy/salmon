@@ -103,7 +103,7 @@ workflows:
       - build:
           release: true
           requires:
-            - 'prepare'
+            - 'lint'
           filters:
             branches:
               ignore: '/.*/'
@@ -112,7 +112,6 @@ workflows:
       - test:
           release: true
           requires:
-            - 'lint'
             - 'build'
           filters:
             tags:
