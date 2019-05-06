@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  prepare:
     docker:
       - image: 'rust:1.34-stretch'
     steps:
@@ -9,11 +9,27 @@ jobs:
           name: 'Prepare tools to test'
           command: |
             rustup component add rustfmt
-
+      - persist_to_workspace:
+          root: '/'
+          paths:
+            - 'usr/local/rustup'
+            - 'root/project'
+  lint:
+    docker:
+      - image: 'rust:1.34-stretch'
+    steps:
+      - attach_workspace:
+          at: '/'
       - run:
           name: 'Check format'
           command: |
             cargo fmt -- --check
+  build:
+    docker:
+      - image: 'rust:1.34-stretch'
+    steps:
+      - attach_workspace:
+          at: '/'
       - restore_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}'
       - run:
@@ -25,7 +41,66 @@ jobs:
           paths:
             - '/usr/local/cargo/registry'
             - 'target/'
+      - persist_to_workspace:
+          root: '/'
+          paths:
+            - 'usr/local/rustup'
+            - 'usr/local/cargo/registry'
+            - 'root/project'
+  test:
+    docker:
+      - image: 'rust:1.34-stretch'
+    steps:
+      - attach_workspace:
+          at: '/'
       - run:
           name: 'Test'
           command: |
             cargo test
+  release:
+    docker:
+      - image: 'rust:1.34-stretch'
+    steps:
+      - attach_workspace:
+          at: '.'
+      - run:
+          name: 'Dummy'
+          command: |
+            pwd
+            ls -alh
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - prepare:
+          filters:
+            branches:
+              only: '/.*/'
+      - lint:
+          requires:
+            - 'prepare'
+          filters:
+            branches:
+              only: '/.*/'
+      - build:
+          requires:
+            - 'prepare'
+          filters:
+            branches:
+              only: '/.*/'
+      - test:
+          requires:
+            - 'build'
+          filters:
+            branches:
+              only: '/.*/'
+      - release:
+          requires:
+            - 'test'
+          filters:
+            branches:
+              ignore:
+                - '/.*/'
+            tags:
+              only: '/^v\d+\.\d+\.\d+/'
