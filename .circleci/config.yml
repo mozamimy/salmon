@@ -1,68 +1,66 @@
-version: 2
-jobs:
-  prepare:
+version: 2.1
+
+executors:
+  default:
     docker:
       - image: 'rust:1.34-stretch'
+
+commands:
+  carry_env_forward:
     steps:
-      - 'checkout'
-      - run:
-          name: 'Prepare tools to test'
-          command: |
-            rustup component add rustfmt
-      - persist_to_workspace:
-          root: '/'
-          paths:
-            - 'usr/local/rustup'
-            - 'root/project'
-  lint:
-    docker:
-      - image: 'rust:1.34-stretch'
-    steps:
-      - attach_workspace:
-          at: '/'
-      - run:
-          name: 'Check format'
-          command: |
-            cargo fmt -- --check
-  build:
-    docker:
-      - image: 'rust:1.34-stretch'
-    steps:
-      - attach_workspace:
-          at: '/'
-      - restore_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}'
-      - run:
-          name: 'Build'
-          command: |
-            cargo build
-      - save_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}'
-          paths:
-            - '/usr/local/cargo/registry'
-            - 'target/'
       - persist_to_workspace:
           root: '/'
           paths:
             - 'usr/local/rustup'
             - 'usr/local/cargo/registry'
             - 'root/project'
-  test:
-    docker:
-      - image: 'rust:1.34-stretch'
+
+jobs:
+  prepare:
+    executor: 'default'
+    steps:
+      - 'checkout'
+      - run: 'rustup component add rustfmt'
+      - 'carry_env_forward'
+  lint:
+    executor: 'default'
     steps:
       - attach_workspace:
           at: '/'
-      - run:
-          name: 'Test'
-          command: |
-            cargo test
-  release:
-    docker:
-      - image: 'rust:1.34-stretch'
+      - run: 'cargo fmt -- --check'
+  build:
+    executor: 'default'
+    parameters:
+      release:
+        type: 'boolean'
+        default: false
     steps:
       - attach_workspace:
-          at: '.'
+          at: '/'
+      - restore_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
+      - run: 'cargo build <<# parameters.release >>--release<</ parameters.release>>'
+      - save_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
+          paths:
+            - '/usr/local/cargo/registry'
+            - 'target/'
+      - 'carry_env_forward'
+  test:
+    executor: 'default'
+    parameters:
+      release:
+        type: 'boolean'
+        default: false
+    steps:
+      - attach_workspace:
+          at: '/'
+      - run: 'cargo test <<# parameters.release >>--release<</ parameters.release>>'
+  release:
+    executor: 'default'
+    steps:
+      - attach_workspace:
+          at: '/'
       - run:
           name: 'Dummy'
           command: |
@@ -71,30 +69,52 @@ jobs:
 
 workflows:
   version: 2
-  default:
+  # This workflow is invoked in all branches.
+  run_test:
+    jobs:
+      - 'prepare'
+      - lint:
+          requires:
+            - 'prepare'
+      - build:
+          requires:
+            - 'prepare'
+      - test:
+          requires:
+            - 'build'
+  # This workflow is invoked when a vX.Y.Z tag is pushed.
+  release:
     jobs:
       - prepare:
           filters:
+            branches:
+              ignore: '/.*/'
             tags:
-              only: '/.*/'
+              only: '/^v\d+\.\d+\.\d+/'
       - lint:
           requires:
             - 'prepare'
           filters:
+            branches:
+              ignore: '/.*/'
             tags:
-              only: '/.*/'
+              only: '/^v\d+\.\d+\.\d+/'
       - build:
+          release: true
           requires:
             - 'prepare'
           filters:
+            branches:
+              ignore: '/.*/'
             tags:
-              only: '/.*/'
+              only: '/^v\d+\.\d+\.\d+/'
       - test:
+          release: true
           requires:
             - 'build'
           filters:
             tags:
-              only: '/.*/'
+              only: '/^v\d+\.\d+\.\d+/'
       - release:
           requires:
             - 'test'
