@@ -66,6 +66,10 @@ jobs:
           command: |
             pwd
             ls -alh
+  debug_circleci:
+    executor: 'default'
+    steps:
+      - run: 'cat /proc/cpuinfo'
 
 workflows:
   version: 2
@@ -103,6 +107,7 @@ workflows:
       - build:
           release: true
           requires:
+            - 'lint'
             - 'prepare'
           filters:
             branches:
@@ -125,3 +130,7 @@ workflows:
               ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
+  # This workflow is just for debug CircleCI config
+  debug_circleci:
+    jobs:
+      - 'debug_circleci'
