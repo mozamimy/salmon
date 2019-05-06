@@ -78,7 +78,7 @@ workflows:
             branches:
               only: '/.*/'
             tags:
-              only: '/.*'
+              only: '/.*/'
       - lint:
           requires:
             - 'prepare'
