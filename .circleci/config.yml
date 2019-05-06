@@ -81,6 +81,7 @@ workflows:
             - 'prepare'
       - test:
           requires:
+            - 'lint'
             - 'build'
   # This workflow is invoked when a vX.Y.Z tag is pushed.
   release:
@@ -111,6 +112,7 @@ workflows:
       - test:
           release: true
           requires:
+            - 'lint'
             - 'build'
           filters:
             tags:
