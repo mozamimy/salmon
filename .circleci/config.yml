@@ -34,6 +34,8 @@ jobs:
       release:
         type: 'boolean'
         default: false
+    environment:
+      MAKE_LIBSASS_JOBS: '4'
     steps:
       - attach_workspace:
           at: '/'
