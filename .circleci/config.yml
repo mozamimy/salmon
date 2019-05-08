@@ -109,7 +109,6 @@ workflows:
       - build:
           release: true
           requires:
-            - 'lint'
             - 'prepare'
           filters:
             branches:
