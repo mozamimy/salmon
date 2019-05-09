@@ -53,7 +53,7 @@ pub fn load_articles(
                     .push(article.clone());
                 sorted_articles.push(article.clone());
             }
-            Err(e) => return Err(format_err!("{:?}", e)),
+            Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
     sorted_articles.sort_by_key(|a| std::cmp::Reverse(a.date));
@@ -102,7 +102,7 @@ fn decompose_source(
         match line_number {
             0 | 4 => {
                 if line.trim() != "---" {
-                    return Err(format_err!(
+                    return Err(failure::format_err!(
                         "Invalid markdown metadata format error.\nLine {} is not `---`",
                         line_number,
                     ));
@@ -115,7 +115,7 @@ fn decompose_source(
                     match v.get(1) {
                         Some(s) => title = s.trim().to_string(),
                         None => {
-                            return Err(format_err!(
+                            return Err(failure::format_err!(
                                 "{} does not have any value",
                                 v.get(0).unwrap()
                             ))
@@ -128,7 +128,7 @@ fn decompose_source(
                             date = chrono::NaiveDate::parse_from_str(s.trim(), "%Y-%m-%d")?;
                         }
                         None => {
-                            return Err(format_err!(
+                            return Err(failure::format_err!(
                                 "{} does not have any value",
                                 v.get(0).unwrap()
                             ))
@@ -143,14 +143,14 @@ fn decompose_source(
                             }
                         }
                         None => {
-                            return Err(format_err!(
+                            return Err(failure::format_err!(
                                 "{} does not have any value",
                                 v.get(0).unwrap()
                             ))
                         }
                     }
                 } else {
-                    return Err(format_err!(
+                    return Err(failure::format_err!(
                         "Invalid markdown metadate element error.\n`{}` is not supported.",
                         line
                     ));

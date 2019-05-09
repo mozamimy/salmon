@@ -17,7 +17,7 @@ pub fn load_partials(src_dir: &PathBuf) -> Result<Vec<Partial>, Error> {
     for entry in partial_glob {
         match entry {
             Ok(path) => partials.push(load_partial(&path)?),
-            Err(e) => return Err(format_err!("{:?}", e)),
+            Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
 

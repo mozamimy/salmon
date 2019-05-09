@@ -44,7 +44,7 @@ pub fn load_resources(src_dir: &PathBuf) -> Result<Vec<Resource>, Error> {
                 }
                 resources.push(resource);
             }
-            Err(e) => return Err(format_err!("{:?}", e)),
+            Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
 
@@ -53,7 +53,7 @@ pub fn load_resources(src_dir: &PathBuf) -> Result<Vec<Resource>, Error> {
 
 fn load_sass(src_path: &PathBuf, dest_path: &PathBuf) -> Result<Sass, Error> {
     let compiled = sass_rs::compile_file(src_path, sass_rs::Options::default())
-        .map_err(|e| format_err!("{:?}", e))?;
+        .map_err(|e| failure::format_err!("{:?}", e))?;
 
     Ok(Sass {
         src_path: src_path.clone(),

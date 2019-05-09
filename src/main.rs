@@ -1,17 +1,3 @@
-extern crate chrono;
-extern crate clap;
-#[macro_use]
-extern crate failure;
-extern crate glob;
-extern crate handlebars;
-extern crate pulldown_cmark;
-extern crate scraper;
-extern crate serde;
-extern crate serde_derive;
-#[macro_use]
-extern crate serde_json;
-extern crate syntect;
-
 pub mod article;
 pub mod blog;
 pub mod code;
