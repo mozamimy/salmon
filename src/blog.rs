@@ -86,7 +86,7 @@ impl Blog {
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.index {
             Layout::Index(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         std::fs::create_dir_all(self.dest_dir.join("page"))?;
@@ -108,13 +108,19 @@ impl Blog {
             data.insert("codes".to_string(), handlebars::to_json(&self.codes));
 
             let mut paginate = Map::new();
-            paginate.insert("page_number".to_string(), json!(i));
-            paginate.insert("num_pages".to_string(), json!(num_pages));
+            paginate.insert("page_number".to_string(), serde_json::json!(i));
+            paginate.insert("num_pages".to_string(), serde_json::json!(num_pages));
             if i > 1 {
-                paginate.insert("prev_page".to_string(), json!(format!("/page/{}/", i - 1)));
+                paginate.insert(
+                    "prev_page".to_string(),
+                    serde_json::json!(format!("/page/{}/", i - 1)),
+                );
             }
             if i < num_pages {
-                paginate.insert("next_page".to_string(), json!(format!("/page/{}/", i + 1)));
+                paginate.insert(
+                    "next_page".to_string(),
+                    serde_json::json!(format!("/page/{}/", i + 1)),
+                );
             }
             data.insert("paginate".to_string(), handlebars::to_json(&paginate));
 
@@ -142,7 +148,7 @@ impl Blog {
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.article {
             Layout::Article(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         for article in self.sorted_articles.iter() {
@@ -176,7 +182,7 @@ impl Blog {
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.tag {
             Layout::Tag(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         for (tag, articles) in self.articles_by_tag.iter() {
@@ -198,25 +204,25 @@ impl Blog {
                 data.insert("articles".to_string(), handlebars::to_json(page));
 
                 let mut paginate = Map::new();
-                paginate.insert("page_number".to_string(), json!(i));
-                paginate.insert("num_pages".to_string(), json!(num_pages));
+                paginate.insert("page_number".to_string(), serde_json::json!(i));
+                paginate.insert("num_pages".to_string(), serde_json::json!(num_pages));
                 if i > 1 {
                     if i == 2 {
                         paginate.insert(
                             "prev_page".to_string(),
-                            json!(format!("/tags/{}.html", tag)),
+                            serde_json::json!(format!("/tags/{}.html", tag)),
                         );
                     } else {
                         paginate.insert(
                             "prev_page".to_string(),
-                            json!(format!("/tags/{}/page/{}.html", tag, i - 1)),
+                            serde_json::json!(format!("/tags/{}/page/{}.html", tag, i - 1)),
                         );
                     }
                 }
                 if i < num_pages {
                     paginate.insert(
                         "next_page".to_string(),
-                        json!(format!("/tags/{}/page/{}.html", tag, i + 1)),
+                        serde_json::json!(format!("/tags/{}/page/{}.html", tag, i + 1)),
                     );
                 }
                 data.insert("paginate".to_string(), handlebars::to_json(&paginate));
@@ -250,7 +256,7 @@ impl Blog {
     ) -> Result<(), Error> {
         let template_string = match &self.layouts.year {
             Layout::Year(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         for (year, articles) in self.articles_by_year.iter() {
@@ -271,22 +277,25 @@ impl Blog {
                 data.insert("articles".to_string(), handlebars::to_json(page));
 
                 let mut paginate = Map::new();
-                paginate.insert("page_number".to_string(), json!(i));
-                paginate.insert("num_pages".to_string(), json!(num_pages));
+                paginate.insert("page_number".to_string(), serde_json::json!(i));
+                paginate.insert("num_pages".to_string(), serde_json::json!(num_pages));
                 if i > 1 {
                     if i == 2 {
-                        paginate.insert("prev_page".to_string(), json!(format!("/{}.html", year)));
+                        paginate.insert(
+                            "prev_page".to_string(),
+                            serde_json::json!(format!("/{}.html", year)),
+                        );
                     } else {
                         paginate.insert(
                             "prev_page".to_string(),
-                            json!(format!("/{}/page/{}.html", year, i - 1)),
+                            serde_json::json!(format!("/{}/page/{}.html", year, i - 1)),
                         );
                     }
                 }
                 if i < num_pages {
                     paginate.insert(
                         "next_page".to_string(),
-                        json!(format!("/{}/page/{}.html", year, i + 1)),
+                        serde_json::json!(format!("/{}/page/{}.html", year, i + 1)),
                     );
                 }
                 data.insert("paginate".to_string(), handlebars::to_json(&paginate));
@@ -312,7 +321,7 @@ impl Blog {
     fn build_general_page(&self, renderer: &Handlebars) -> Result<(), Error> {
         let template_string = match &self.layouts.page {
             Layout::Page(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         for page in self.pages.iter() {
@@ -332,7 +341,7 @@ impl Blog {
     fn build_rss(&self, renderer: &Handlebars) -> Result<(), Error> {
         let template_string = match &self.layouts.rss {
             Layout::Rss(s) => s,
-            _ => return Err(format_err!("Invalid Layout variant.")),
+            _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         let mut data = Map::new();
@@ -400,10 +409,10 @@ impl Blog {
         let mut tags = Vec::new();
         for tag_key in tag_keys {
             let mut m = Map::new();
-            m.insert("key".to_string(), json!(tag_key));
+            m.insert("key".to_string(), serde_json::json!(tag_key));
             m.insert(
                 "len".to_string(),
-                json!(self.articles_by_tag.get(tag_key).unwrap().len()),
+                serde_json::json!(self.articles_by_tag.get(tag_key).unwrap().len()),
             );
             tags.push(m);
         }
@@ -414,8 +423,8 @@ impl Blog {
         let mut years = Vec::new();
         for (year, articles) in &self.articles_by_year {
             let mut m = Map::new();
-            m.insert("year".to_string(), json!(year));
-            m.insert("len".to_string(), json!(articles.len()));
+            m.insert("year".to_string(), serde_json::json!(year));
+            m.insert("len".to_string(), serde_json::json!(articles.len()));
             years.push(m);
         }
         years.sort_by(|v, u| {
@@ -435,7 +444,7 @@ impl Blog {
     fn extract_parent_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
         Ok(dest_full_path
             .parent()
-            .ok_or(format_err!("Directory not found"))?
+            .ok_or(failure::format_err!("Directory not found"))?
             .to_path_buf())
     }
 }

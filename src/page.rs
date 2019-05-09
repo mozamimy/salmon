@@ -20,7 +20,7 @@ pub fn load_pages(src_dir: &PathBuf) -> Result<Vec<Page>, Error> {
     for entry in page_dir_glob {
         match entry {
             Ok(path) => pages.push(load_page(&path, src_dir)?),
-            Err(e) => return Err(format_err!("{:?}", e)),
+            Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
 

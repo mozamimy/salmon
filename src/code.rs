@@ -28,7 +28,7 @@ pub fn load_codes(src_dir: &PathBuf) -> Result<HashMap<PathBuf, Code>, Error> {
                     codes.insert(key_path, code);
                 }
             }
-            Err(e) => return Err(format_err!("{:?}", e)),
+            Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
 
