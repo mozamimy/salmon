@@ -45,14 +45,7 @@ jobs:
       - restore_cache:
           key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
       - run: 'cargo test <<# parameters.release >>--release --locked<</ parameters.release>>'
-  build_docker_image:
-    executor: 'docker'
-    steps:
-      - 'checkout'
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1} .'
-  push_docker_image:
+  build_and_push_docker_image:
     executor: 'docker'
     environment:
       DOCKER_USER: 'mozamimy'
@@ -60,6 +53,7 @@ jobs:
       - 'checkout'
       - setup_remote_docker:
           docker_layer_caching: true
+      - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1} .'
       - run: 'docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}'
       - run: 'docker push mozamimy/salmon:latest'
       - run: 'docker push mozamimy/salmon:${CIRCLE_TAG:1}'
@@ -104,12 +98,6 @@ workflows:
               ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
-      - build_docker_image:
-          filters:
-            branches:
-              ignore: '/.*/'
-            tags:
-              only: '/^v\d+\.\d+\.\d+/'
       - test:
           release: true
           requires:
@@ -118,10 +106,9 @@ workflows:
           filters:
             tags:
               only: '/^v\d+\.\d+\.\d+/'
-      - push_docker_image:
+      - build_and_push_docker_image:
           requires:
             - 'test'
-            - 'build_docker_image'
           filters:
             branches:
               ignore: '/.*/'
