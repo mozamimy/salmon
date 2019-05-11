@@ -8,28 +8,12 @@ executors:
     docker:
       - image: 'docker:18.09'
 
-commands:
-  carry_env_forward:
-    steps:
-      - persist_to_workspace:
-          root: '/'
-          paths:
-            - 'usr/local/rustup'
-            - 'usr/local/cargo/registry'
-            - 'root/project'
-
 jobs:
-  prepare:
+  lint:
     executor: 'default'
     steps:
       - 'checkout'
       - run: 'rustup component add rustfmt'
-      - 'carry_env_forward'
-  lint:
-    executor: 'default'
-    steps:
-      - attach_workspace:
-          at: '/'
       - run: 'cargo fmt -- --check'
   build:
     executor: 'default'
@@ -40,8 +24,7 @@ jobs:
     environment:
       MAKE_LIBSASS_JOBS: '4'
     steps:
-      - attach_workspace:
-          at: '/'
+      - 'checkout'
       - restore_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
       - run: 'cargo build --jobs 2 <<# parameters.release >>--release --locked<</ parameters.release>>'
@@ -50,7 +33,6 @@ jobs:
           paths:
             - '/usr/local/cargo/registry'
             - 'target/'
-      - 'carry_env_forward'
   test:
     executor: 'default'
     parameters:
@@ -58,8 +40,9 @@ jobs:
         type: 'boolean'
         default: false
     steps:
-      - attach_workspace:
-          at: '/'
+      - 'checkout'
+      - restore_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
       - run: 'cargo test <<# parameters.release >>--release --locked<</ parameters.release>>'
   build_docker_image:
     executor: 'docker'
@@ -83,8 +66,9 @@ jobs:
   publish_crate:
     executor: 'default'
     steps:
-      - attach_workspace:
-          at: '/'
+      - 'checkout'
+      - restore_cache:
+          key: 'cargo-lock-{{ checksum "Cargo.lock"}}-release'
       - run: 'cargo login ${CRATES_IO_API_TOKEN}'
       - run: 'cargo package --jobs 2 --locked'
       - run: 'cargo publish --jobs 2 --locked'
@@ -94,13 +78,8 @@ workflows:
   # This workflow is invoked in all branches.
   run_test:
     jobs:
-      - 'prepare'
-      - lint:
-          requires:
-            - 'prepare'
-      - build:
-          requires:
-            - 'prepare'
+      - 'lint'
+      - 'build'
       - test:
           requires:
             - 'lint'
@@ -108,15 +87,7 @@ workflows:
   # This workflow is invoked when a vX.Y.Z tag is pushed.
   release:
     jobs:
-      - prepare:
-          filters:
-            branches:
-              ignore: '/.*/'
-            tags:
-              only: '/^v\d+\.\d+\.\d+/'
       - lint:
-          requires:
-            - 'prepare'
           filters:
             branches:
               ignore: '/.*/'
@@ -124,16 +95,12 @@ workflows:
               only: '/^v\d+\.\d+\.\d+/'
       - build:
           release: true
-          requires:
-            - 'prepare'
           filters:
             branches:
               ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
       - build_docker_image:
-          requires:
-            - 'prepare'
           filters:
             branches:
               ignore: '/.*/'
