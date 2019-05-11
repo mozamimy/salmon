@@ -67,7 +67,7 @@ jobs:
       - 'checkout'
       - setup_remote_docker:
           docker_layer_caching: true
-      - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1}'
+      - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1} .'
   push_docker_image:
     executor: 'docker'
     environment:
