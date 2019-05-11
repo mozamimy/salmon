@@ -26,10 +26,10 @@ jobs:
     steps:
       - 'checkout'
       - restore_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
+          key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
       - run: 'cargo build --jobs 2 <<# parameters.release >>--release --locked<</ parameters.release>>'
       - save_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
+          key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
           paths:
             - '/usr/local/cargo/registry'
             - 'target/'
@@ -42,7 +42,7 @@ jobs:
     steps:
       - 'checkout'
       - restore_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
+          key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
       - run: 'cargo test <<# parameters.release >>--release --locked<</ parameters.release>>'
   build_docker_image:
     executor: 'docker'
@@ -68,7 +68,7 @@ jobs:
     steps:
       - 'checkout'
       - restore_cache:
-          key: 'cargo-lock-{{ checksum "Cargo.lock"}}-release'
+          key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}-release'
       - run: 'cargo login ${CRATES_IO_API_TOKEN}'
       - run: 'cargo package --jobs 2 --locked'
       - run: 'cargo publish --jobs 2 --locked'
