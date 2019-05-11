@@ -9,7 +9,7 @@ executors:
       BUILD_JOBS: '4'
   docker:
     docker:
-      - image: 'docker:18.06.3-ce'
+      - image: 'docker:18.09'
 
 jobs:
   lint:
@@ -50,7 +50,6 @@ jobs:
     steps:
       - 'checkout'
       - setup_remote_docker:
-          version: '18.06.3-ce'
           docker_layer_caching: true
       - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1} .'
   push_docker_image:
@@ -60,7 +59,6 @@ jobs:
     steps:
       - 'checkout'
       - setup_remote_docker:
-          version: '18.06.3-ce'
           docker_layer_caching: true
       - run: 'docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}'
       - run: 'docker push mozamimy/salmon:latest'
