@@ -87,7 +87,7 @@ jobs:
           at: '/'
       - run: 'cargo login ${CRATES_IO_API_TOKEN}'
       - run: 'cargo package --jobs 2 --locked'
-      - run: 'cargo publish --jobs 2--locked'
+      - run: 'cargo publish --jobs 2 --locked'
 
 workflows:
   version: 2
