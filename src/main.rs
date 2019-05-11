@@ -13,7 +13,7 @@ use crate::blog::Blog;
 
 fn main() {
     let matches = clap::App::new("salmon")
-        .version("0.1.0")
+        .version("0.2.1")
         .author("mozamimy <alice@mozami.me>")
         .about("A lightweight static site generator specialized for blogging.")
         .subcommand(
