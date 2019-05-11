@@ -4,6 +4,9 @@ executors:
   default:
     docker:
       - image: 'rust:1.34-stretch'
+  docker:
+    docker:
+      - image: 'docker:18.09'
 
 commands:
   carry_env_forward:
@@ -41,7 +44,7 @@ jobs:
           at: '/'
       - restore_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
-      - run: 'cargo build <<# parameters.release >>--release --locked<</ parameters.release>>'
+      - run: 'cargo build --jobs 2 <<# parameters.release >>--release --locked<</ parameters.release>>'
       - save_cache:
           key: 'cargo-lock-{{ checksum "Cargo.lock"}}<<# parameters.release >>-release<</ parameters.release>>'
           paths:
@@ -58,20 +61,33 @@ jobs:
       - attach_workspace:
           at: '/'
       - run: 'cargo test <<# parameters.release >>--release --locked<</ parameters.release>>'
-  release:
+  build_docker_image:
+    executor: 'docker'
+    steps:
+      - 'checkout'
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: 'docker build --tag mozamimy/salmon:latest --tag mozamimy/salmon:${CIRCLE_TAG:1} --tag mozamimy/salmon:${CIRCLE_SHA1}'
+  push_docker_image:
+    executor: 'docker'
+    environment:
+      DOCKER_USER: 'mozamimy'
+    steps:
+      - 'checkout'
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: 'docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}'
+      - run: 'docker push mozamimy/salmon:latest'
+      - run: 'docker push mozamimy/salmon:${CIRCLE_TAG:1}'
+      - run: 'docker push mozamimy/salmon:${CIRCLE_SHA1}'
+  publish_crate:
     executor: 'default'
     steps:
       - attach_workspace:
           at: '/'
-      - run:
-          name: 'Dummy'
-          command: |
-            pwd
-            ls -alh
-  debug_circleci:
-    executor: 'default'
-    steps:
-      - run: 'cat /proc/cpuinfo'
+      - run: 'cargo login ${CRATES_IO_API_TOKEN}'
+      - run: 'cargo package --jobs 2 --locked'
+      - run: 'cargo publish --jobs 2--locked'
 
 workflows:
   version: 2
@@ -115,6 +131,14 @@ workflows:
               ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
+      - build_docker_image:
+          requires:
+            - 'prepare'
+          filters:
+            branches:
+              ignore: '/.*/'
+            tags:
+              only: '/^v\d+\.\d+\.\d+/'
       - test:
           release: true
           requires:
@@ -123,7 +147,16 @@ workflows:
           filters:
             tags:
               only: '/^v\d+\.\d+\.\d+/'
-      - release:
+      - push_docker_image:
+          requires:
+            - 'test'
+            - 'build_docker_image'
+          filters:
+            branches:
+              ignore: '/.*/'
+            tags:
+              only: '/^v\d+\.\d+\.\d+/'
+      - publish_crate:
           requires:
             - 'test'
           filters:
@@ -131,7 +164,3 @@ workflows:
               ignore: '/.*/'
             tags:
               only: '/^v\d+\.\d+\.\d+/'
-  # This workflow is just for debug CircleCI config
-  debug_circleci:
-    jobs:
-      - 'debug_circleci'
