@@ -73,7 +73,10 @@ jobs:
           key: 'v1-cargo-lock-{{ checksum "Cargo.lock"}}-release'
       - run: 'cargo login ${CRATES_IO_API_TOKEN}'
       - run: 'cargo package --jobs 4 --locked'
-      - run: 'cargo publish --jobs 4 --locked'
+      # Cannot publish this crate because using forked sass-rs now.
+      # https://github.com/mozamimy/sass-rs/tree/make-libsass-env
+      # We are waiting to merge https://github.com/compass-rs/sass-rs/pull/43.
+      # - run: 'cargo publish --jobs 4 --locked'
 
 workflows:
   version: 2
