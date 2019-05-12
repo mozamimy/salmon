@@ -29,7 +29,23 @@ cargo install salmon
 
 ## Usage
 
-TBD
+### Config
+
+You should put YAML config file in project root directory.
+
+```yaml
+version: '1' # required
+blog: # required
+  site_root: 'https://example.com/', # required
+  index_page: # optional
+    entries_per_page: 10 # optional
+  year_page: # optional
+    entries_per_page: 15 # optional
+  tag_page: # optional
+    entries_per_page: 15 # optional
+```
+
+(TBD)
 
 ## License
 

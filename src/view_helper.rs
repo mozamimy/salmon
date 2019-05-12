@@ -37,7 +37,7 @@ pub fn convert_to_iso8601(
 pub fn article_ogp_meta_tags(
     h: &Helper,
     _: &Handlebars,
-    _: &Context,
+    ctx: &Context,
     _: &mut RenderContext,
     out: &mut Output,
 ) -> Result<(), RenderError> {
@@ -66,11 +66,13 @@ pub fn article_ogp_meta_tags(
     out.write(&meta_description)?;
 
     let selector_img = Selector::parse("img").unwrap();
+    let site_root = ctx.data().get("site_root").unwrap().as_str().unwrap();
     match article_html.select(&selector_img).next() {
         Some(t) => {
             let meta_image = format!(
                 // XXX: Ugly hard coded domain :<
-                "<meta property=\"og:image\" content=\"https://mozami.me{}\">\n",
+                "<meta property=\"og:image\" content=\"{}{}\">\n",
+                site_root,
                 handlebars::html_escape(t.value().attr("src").unwrap()),
             );
             out.write(&meta_image)?;

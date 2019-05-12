@@ -1,6 +1,7 @@
 pub mod article;
 pub mod blog;
 pub mod code;
+pub mod config;
 pub mod converter;
 pub mod layout;
 pub mod page;
@@ -10,6 +11,7 @@ pub mod resource;
 pub mod view_helper;
 
 use crate::blog::Blog;
+use crate::config::Config;
 
 fn main() -> Result<(), failure::Error> {
     env_logger::try_init()?;
@@ -58,7 +60,9 @@ fn main() -> Result<(), failure::Error> {
                 std::process::exit(1)
             });
 
-            let init_blog_result = Blog::init(canonicalized_src_dir, canonicalized_dest_dir);
+            let config = Config::load(&canonicalized_src_dir)?;
+            let init_blog_result =
+                Blog::init(canonicalized_src_dir, canonicalized_dest_dir, config);
             match init_blog_result {
                 Ok(blog) => blog.build().unwrap(),
                 Err(e) => {
