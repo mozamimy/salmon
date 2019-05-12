@@ -17,7 +17,7 @@ fn main() -> Result<(), failure::Error> {
     env_logger::try_init()?;
 
     let matches = clap::App::new("salmon")
-        .version("0.2.1")
+        .version("0.3.0")
         .author("mozamimy <alice@mozami.me>")
         .about("A lightweight static site generator specialized for blogging.")
         .subcommand(
