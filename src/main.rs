@@ -11,7 +11,9 @@ pub mod view_helper;
 
 use crate::blog::Blog;
 
-fn main() {
+fn main() -> Result<(), failure::Error> {
+    env_logger::try_init()?;
+
     let matches = clap::App::new("salmon")
         .version("0.2.1")
         .author("mozamimy <alice@mozami.me>")
@@ -73,4 +75,6 @@ fn main() {
             std::process::exit(1)
         }
     }
+
+    Ok(())
 }
