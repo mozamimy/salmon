@@ -101,7 +101,10 @@ impl Blog {
 
         std::fs::create_dir_all(self.dest_dir.join("page"))?;
 
-        let paginator = Paginator::new(&self.sorted_articles, 10);
+        let entries_per_page = match &self.config {
+            Config::V1(ref c) => c.blog.index_page.entries_per_page,
+        };
+        let paginator = Paginator::new(&self.sorted_articles, entries_per_page as usize);
         let num_pages = paginator.len();
         for (mut i, page) in paginator.enumerate() {
             // The page number seen from users is 1 origin.
@@ -116,6 +119,10 @@ impl Blog {
                 handlebars::to_json(recent_articles),
             );
             data.insert("codes".to_string(), handlebars::to_json(&self.codes));
+            data.insert(
+                "site_root".to_string(),
+                handlebars::to_json(self.site_root()),
+            );
 
             let mut paginate = Map::new();
             paginate.insert("page_number".to_string(), serde_json::json!(i));
@@ -173,6 +180,10 @@ impl Blog {
                 handlebars::to_json(recent_articles),
             );
             data.insert("codes".to_string(), handlebars::to_json(&self.codes));
+            data.insert(
+                "site_root".to_string(),
+                handlebars::to_json(self.site_root()),
+            );
 
             renderer.register_partial("article_html", &article.html)?;
             let html = renderer.render_template(template_string.as_str(), &data)?;
@@ -208,8 +219,15 @@ impl Blog {
                 "recent_articles".to_string(),
                 handlebars::to_json(recent_articles),
             );
+            data.insert(
+                "site_root".to_string(),
+                handlebars::to_json(self.site_root()),
+            );
 
-            let paginator = Paginator::new(&articles, 15);
+            let entries_per_page = match &self.config {
+                Config::V1(ref c) => c.blog.tag_page.entries_per_page,
+            };
+            let paginator = Paginator::new(&articles, entries_per_page as usize);
             let num_pages = paginator.len();
             for (mut i, page) in paginator.enumerate() {
                 // The page number seen from users is 1 origin.
@@ -284,7 +302,15 @@ impl Blog {
                 "recent_articles".to_string(),
                 handlebars::to_json(recent_articles),
             );
-            let paginator = Paginator::new(&articles, 15);
+            data.insert(
+                "site_root".to_string(),
+                handlebars::to_json(self.site_root()),
+            );
+
+            let entries_per_page = match &self.config {
+                Config::V1(ref c) => c.blog.year_page.entries_per_page,
+            };
+            let paginator = Paginator::new(&articles, entries_per_page as usize);
             let num_pages = paginator.len();
             for (mut i, page) in paginator.enumerate() {
                 // The page number seen from users is 1 origin.
@@ -345,6 +371,10 @@ impl Blog {
         for page in self.pages.iter() {
             let mut data = Map::new();
             data.insert("page".to_string(), handlebars::to_json(page));
+            data.insert(
+                "site_root".to_string(),
+                handlebars::to_json(self.site_root()),
+            );
 
             let html = renderer.render_template(template_string.as_str(), &data)?;
             let dest_full_path = self.dest_dir.join(&page.path).with_extension("html");
@@ -368,6 +398,10 @@ impl Blog {
         data.insert(
             "articles".to_string(),
             handlebars::to_json(&self.sorted_articles[0..5]),
+        );
+        data.insert(
+            "site_root".to_string(),
+            handlebars::to_json(self.site_root()),
         );
 
         let html = renderer.render_template(&template_string, &data)?;
@@ -470,5 +504,11 @@ impl Blog {
             .parent()
             .ok_or(failure::format_err!("Directory not found"))?
             .to_path_buf())
+    }
+
+    fn site_root(&self) -> &str {
+        match self.config {
+            Config::V1(ref c) => c.blog.site_root.as_str(),
+        }
     }
 }
