@@ -25,6 +25,7 @@ pub fn load_codes(src_dir: &PathBuf) -> Result<HashMap<PathBuf, Code>, Error> {
                     let code = load_code(&path)?;
                     let key_path = PathBuf::from("/")
                         .join(path.strip_prefix(src_dir.join("codes/"))?.to_path_buf());
+                    log::info!("Code \"{:?}\" has been loaded.", &key_path);
                     codes.insert(key_path, code);
                 }
             }

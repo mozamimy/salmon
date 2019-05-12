@@ -11,7 +11,9 @@ pub mod view_helper;
 
 use crate::blog::Blog;
 
-fn main() {
+fn main() -> Result<(), failure::Error> {
+    env_logger::try_init()?;
+
     let matches = clap::App::new("salmon")
         .version("0.2.1")
         .author("mozamimy <alice@mozami.me>")
@@ -48,11 +50,11 @@ fn main() {
             }
 
             let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
-                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!("Failed to canonicalize source directory path: {:?}", e);
                 std::process::exit(1)
             });
             let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
-                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!("Failed to canonicalize source directory path: {:?}", e);
                 std::process::exit(1)
             });
 
@@ -60,7 +62,7 @@ fn main() {
             match init_blog_result {
                 Ok(blog) => blog.build().unwrap(),
                 Err(e) => {
-                    eprintln!(
+                    log::error!(
                         "An error is occured while loading components.\n{:?}\nexit.",
                         e
                     );
@@ -69,8 +71,10 @@ fn main() {
             }
         }
         _ => {
-            eprintln!("Subcommand is not specified or unsupported subcommand.\nexit.");
+            log::error!("Subcommand is not specified or unsupported subcommand.\nexit.");
             std::process::exit(1)
         }
     }
+
+    Ok(())
 }

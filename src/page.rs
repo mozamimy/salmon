@@ -19,7 +19,10 @@ pub fn load_pages(src_dir: &PathBuf) -> Result<Vec<Page>, Error> {
 
     for entry in page_dir_glob {
         match entry {
-            Ok(path) => pages.push(load_page(&path, src_dir)?),
+            Ok(path) => {
+                pages.push(load_page(&path, src_dir)?);
+                log::info!("Page \"{:?}\" has been loaded.", pages.last().unwrap().path);
+            }
             Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
     }
