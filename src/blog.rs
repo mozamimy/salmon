@@ -2,6 +2,8 @@ use crate::article::ArticlesByTag;
 use crate::article::*;
 use crate::code::load_codes;
 use crate::code::Code;
+use crate::config;
+use crate::config::Config;
 use crate::layout::load_layouts;
 use crate::layout::{Layout, Layouts};
 use crate::page::load_pages;
@@ -25,6 +27,8 @@ type ViewItems = std::vec::Vec<serde_json::Map<String, handlebars::JsonValue>>;
 
 #[derive(Debug)]
 pub struct Blog {
+    config: Config,
+
     src_dir: std::path::PathBuf,
     dest_dir: std::path::PathBuf,
 
@@ -39,7 +43,7 @@ pub struct Blog {
 }
 
 impl Blog {
-    pub fn init(src_dir: PathBuf, dest_dir: PathBuf) -> Result<Self, Error> {
+    pub fn init(src_dir: PathBuf, dest_dir: PathBuf, config: Config) -> Result<Self, Error> {
         log::info!("Start to load project files.");
 
         let (articles_by_tag, articles_by_year, sorted_articles) = load_articles(&src_dir)?;
@@ -52,6 +56,8 @@ impl Blog {
         log::info!("Finished to load project files.");
 
         Ok(Blog {
+            config: config,
+
             src_dir: src_dir,
             dest_dir: dest_dir,
 
