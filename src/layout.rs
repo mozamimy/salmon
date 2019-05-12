@@ -62,5 +62,6 @@ fn load_file(src_dir: &PathBuf, file_name: &str) -> Result<String, Error> {
     let mut file = File::open(src_dir.join("layouts").join(file_name))?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
+    log::info!("Layout \"{}\" has been loaded.", file_name);
     Ok(content)
 }

@@ -43,6 +43,14 @@ pub fn load_resources(src_dir: &PathBuf) -> Result<Vec<Resource>, Error> {
                     None => unreachable!(),
                 }
                 resources.push(resource);
+                match &resources.last().unwrap() {
+                    Resource::StyleSheet(s) => {
+                        log::info!("Stylesheet \"{:?}\" has been loaded.", s.src_path)
+                    }
+                    Resource::General(g) => {
+                        log::info!("Resource \"{:?}\" has been loaded.", g.src_path)
+                    }
+                }
             }
             Err(e) => return Err(failure::format_err!("{:?}", e)),
         }

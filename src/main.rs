@@ -50,11 +50,11 @@ fn main() -> Result<(), failure::Error> {
             }
 
             let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
-                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!("Failed to canonicalize source directory path: {:?}", e);
                 std::process::exit(1)
             });
             let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
-                eprintln!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!("Failed to canonicalize source directory path: {:?}", e);
                 std::process::exit(1)
             });
 
@@ -62,7 +62,7 @@ fn main() -> Result<(), failure::Error> {
             match init_blog_result {
                 Ok(blog) => blog.build().unwrap(),
                 Err(e) => {
-                    eprintln!(
+                    log::error!(
                         "An error is occured while loading components.\n{:?}\nexit.",
                         e
                     );
@@ -71,7 +71,7 @@ fn main() -> Result<(), failure::Error> {
             }
         }
         _ => {
-            eprintln!("Subcommand is not specified or unsupported subcommand.\nexit.");
+            log::error!("Subcommand is not specified or unsupported subcommand.\nexit.");
             std::process::exit(1)
         }
     }

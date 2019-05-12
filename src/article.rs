@@ -29,7 +29,6 @@ pub fn load_articles(
     let mut sorted_articles = Vec::new();
 
     let article_dir_glob = glob::glob(&src_dir.join("articles/**/*.md").to_str().unwrap())?;
-
     for entry in article_dir_glob {
         match entry {
             Ok(path) => {
@@ -52,6 +51,8 @@ pub fn load_articles(
                     .unwrap()
                     .push(article.clone());
                 sorted_articles.push(article.clone());
+
+                log::info!("Article \"{}\" has been loaded.", &article.title);
             }
             Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
