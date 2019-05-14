@@ -33,38 +33,39 @@ fn main() -> Result<(), failure::Error> {
                         .index(2),
                 ),
         )
+        .subcommand(
+            clap::SubCommand::with_name("server")
+                .arg(
+                    clap::Arg::with_name("SRC_DIR")
+                        .help("Specify a directory which has salmon source files.")
+                    .index(1),
+                )
+                .arg(
+                    clap::Arg::with_name("DEST_DIR")
+                        .help("Specify a destination directory to put built files.")
+                        .index(2),
+                ),
+        )
         .get_matches();
 
     match matches {
         ref m if m.subcommand_matches("build").is_some() => {
-            let src_dir = std::path::PathBuf::from(
-                m.subcommand_matches("build")
-                    .unwrap()
-                    .value_of("SRC_DIR")
-                    .unwrap_or("./"),
-            );
-            let dest_dir;
-            if let Some(dest_dir_str) = m.subcommand_matches("build").unwrap().value_of("DEST_DIR")
-            {
-                dest_dir = std::path::PathBuf::from(dest_dir_str);
-            } else {
-                dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
+            let blog_result = init_blog(m.subcommand_matches("build").unwrap());
+            match blog_result {
+                Ok(blog) => blog.build()?,
+                Err(e) => {
+                    log::error!(
+                        "An error is occured while loading components.\n{:?}\nexit.",
+                        e
+                    );
+                    std::process::exit(1);
+                }
             }
-
-            let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
-                log::error!("Failed to canonicalize source directory path: {:?}", e);
-                std::process::exit(1)
-            });
-            let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
-                log::error!("Failed to canonicalize source directory path: {:?}", e);
-                std::process::exit(1)
-            });
-
-            let config = Config::load(&canonicalized_src_dir)?;
-            let init_blog_result =
-                Blog::init(canonicalized_src_dir, canonicalized_dest_dir, config);
-            match init_blog_result {
-                Ok(blog) => blog.build().unwrap(),
+        }
+        ref m if m.subcommand_matches("server").is_some() => {
+            let blog_result = init_blog(m.subcommand_matches("build").unwrap());
+            match blog_result {
+                Ok(blog) => blog.build()?,
                 Err(e) => {
                     log::error!(
                         "An error is occured while loading components.\n{:?}\nexit.",
@@ -81,4 +82,27 @@ fn main() -> Result<(), failure::Error> {
     }
 
     Ok(())
+}
+
+fn init_blog(subcommand: &clap::ArgMatches) -> Result<Blog, failure::Error> {
+    let src_dir = std::path::PathBuf::from(subcommand.value_of("SRC_DIR").unwrap_or("./"));
+    let dest_dir;
+    if let Some(dest_dir_str) = subcommand.value_of("DEST_DIR")
+    {
+        dest_dir = std::path::PathBuf::from(dest_dir_str);
+    } else {
+        dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
+    }
+
+    let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
+        log::error!("Failed to canonicalize source directory path: {:?}", e);
+        std::process::exit(1)
+    });
+    let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
+        log::error!("Failed to canonicalize source directory path: {:?}", e);
+        std::process::exit(1)
+    });
+
+    let config = Config::load(&canonicalized_src_dir)?;
+    Ok(Blog::init(canonicalized_src_dir, canonicalized_dest_dir, config)?)
 }
