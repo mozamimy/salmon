@@ -824,7 +824,7 @@ dependencies = [
  "handlebars 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "pulldown-cmark 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "sass-rs 0.2.1 (git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env)",
+ "sass-rs 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "scraper 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -843,17 +843,17 @@ dependencies = [
 
 [[package]]
 name = "sass-rs"
-version = "0.2.1"
-source = "git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env#3054d96fdeebb43af7763ef00467a5ed0418fb61"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.54 (registry+https://github.com/rust-lang/crates.io-index)",
- "sass-sys 0.4.8 (git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env)",
+ "sass-sys 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "sass-sys"
-version = "0.4.8"
-source = "git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env#3054d96fdeebb43af7763ef00467a5ed0418fb61"
+version = "0.4.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc 1.0.36 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.54 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1321,8 +1321,8 @@ dependencies = [
 "checksum ryu 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "b96a9549dc8d48f2c283938303c4b5a77aa29bfbc5b54b084fb1630408899a8f"
 "checksum safemem 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8dca453248a96cb0749e36ccdfe2b0b4e54a61bfef89fb97ec621eb8e0a93dd9"
 "checksum same-file 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "8f20c4be53a8a1ff4c1f1b2bd14570d2f634628709752f0702ecdd2b3f9a5267"
-"checksum sass-rs 0.2.1 (git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env)" = "<none>"
-"checksum sass-sys 0.4.8 (git+https://github.com/mozamimy/sass-rs.git?branch=make-libsass-env)" = "<none>"
+"checksum sass-rs 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "cabcf7c6e55053f359911187ac401409aad2dc14338cae972dec266fee486abd"
+"checksum sass-sys 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)" = "2166010e0b24c6ec7c2d7fb64011a01cd8296d3460893265c2007b07ba2c8313"
 "checksum scraper 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0d78d82bae05de5651f7aca975c147de5d8860a038c09f36c0b9155e7fd5536c"
 "checksum selectors 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1b86b100bede4f651059740afc3b6cb83458d7401cb7c1ad96d8a11e91742c86"
 "checksum serde 1.0.91 (registry+https://github.com/rust-lang/crates.io-index)" = "a72e9b96fa45ce22a4bc23da3858dfccfd60acd28a25bcd328a98fdd6bea43fd"
