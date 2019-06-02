@@ -1,4 +1,4 @@
-FROM rust:1.34-stretch as builder
+FROM rust:1.35-stretch as builder
 
 RUN mkdir -p /build/src
 RUN echo 'fn main() {}' > /build/src/main.rs
