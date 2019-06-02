@@ -27,7 +27,7 @@ pub fn highlight_code(
         Some(s) => s,
         None => {
             if ext.is_none() {
-                eprintln!(
+                log::warn!(
                     "Cannot determine syntax for {:?}. Falling back to plain text mode.",
                     code_path
                 );
@@ -36,7 +36,7 @@ pub fn highlight_code(
                 match ss.find_syntax_by_token(ext.unwrap()) {
                     Some(s) => s,
                     None => {
-                        eprintln!(
+                        log::warn!(
                             "Cannot determine syntax for {:?}. Falling back to plain text mode.",
                             code_path
                         );
