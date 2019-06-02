@@ -2,7 +2,6 @@ use crate::article::ArticlesByTag;
 use crate::article::*;
 use crate::code::load_codes;
 use crate::code::Code;
-use crate::config;
 use crate::config::Config;
 use crate::layout::load_layouts;
 use crate::layout::{Layout, Layouts};
