@@ -18,7 +18,7 @@ pub fn load_partials(src_dir: &PathBuf) -> Result<Vec<Partial>, Error> {
         match entry {
             Ok(path) => {
                 partials.push(load_partial(&path)?);
-                log::info!(
+                log::debug!(
                     "Partial \"{}\" has been loaded.",
                     partials.last().unwrap().name
                 );

@@ -14,6 +14,9 @@ use crate::blog::Blog;
 use crate::config::Config;
 
 fn main() -> Result<(), failure::Error> {
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "info");
+    }
     env_logger::try_init()?;
 
     let matches = clap::App::new("salmon")

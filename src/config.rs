@@ -75,7 +75,7 @@ impl Config {
         match version {
             "1" => {
                 let config_v1: ConfigV1 = serde_yaml::from_str(&config_string)?;
-                log::info!("Completed to load config\n{:?}", config_v1);
+                log::debug!("Completed to load config\n{:?}", config_v1);
                 return Ok(Config::V1(config_v1));
             }
             _ => {

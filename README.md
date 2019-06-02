@@ -29,6 +29,10 @@ cargo install salmon
 
 ## Usage
 
+### Log
+
+You can control log level by `RUST_LOG` environment variable. The default value is `info`.
+
 ### Config
 
 You should put YAML config file in project root directory.
