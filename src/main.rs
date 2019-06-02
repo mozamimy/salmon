@@ -8,6 +8,7 @@ pub mod page;
 pub mod paginator;
 pub mod partial;
 pub mod resource;
+pub mod template_generator;
 pub mod view_helper;
 
 use crate::blog::Blog;
@@ -34,6 +35,37 @@ fn main() -> Result<(), failure::Error> {
                     clap::Arg::with_name("DEST_DIR")
                         .help("Specify a destination directory to put built files.")
                         .index(2),
+                ),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("new")
+                .arg(
+                    clap::Arg::with_name("ARTICLE_NAME")
+                        .help("This value is used to determine article file name.")
+                        .index(1),
+                )
+                .arg(
+                    clap::Arg::with_name("PROJECT_DIR")
+                        .help("Specify your Salmon project directory.")
+                        .index(2),
+                )
+                .arg(
+                    clap::Arg::with_name("article")
+                        .short("a")
+                        .long("article")
+                        .help("Specify this if you want to create a template of article."),
+                )
+                .arg(
+                    clap::Arg::with_name("code")
+                        .short("c")
+                        .long("code")
+                        .help("Specify this if you want to create a directory for codes."),
+                )
+                .arg(
+                    clap::Arg::with_name("image")
+                        .short("i")
+                        .long("image")
+                        .help("Specify this if you want to create a directory for images."),
                 ),
         )
         .get_matches();
@@ -73,6 +105,30 @@ fn main() -> Result<(), failure::Error> {
                         "An error is occured while loading components.\n{:?}\nexit.",
                         e
                     );
+                    std::process::exit(1);
+                }
+            }
+        }
+        ref m if m.subcommand_matches("new").is_some() => {
+            let project_dir = std::path::PathBuf::from(
+                m.subcommand_matches("new")
+                    .unwrap()
+                    .value_of("PROJECT_DIR")
+                    .unwrap_or("./"),
+            );
+            let article_name = m
+                .subcommand_matches("new")
+                .unwrap()
+                .value_of("ARTICLE_NAME")
+                .unwrap_or("no_title");
+            match template_generator::generate_template(
+                &m.subcommand_matches("new").unwrap(),
+                &project_dir,
+                &article_name,
+            ) {
+                Ok(_) => { /* do nothing */ }
+                Err(e) => {
+                    log::error!("{}", e);
                     std::process::exit(1);
                 }
             }

@@ -29,6 +29,24 @@ cargo install salmon
 
 ## Usage
 
+### Initialize Salmon project
+
+(TBD)
+
+### Create new article template and directory with `salmon new` command
+
+You can start writing quickly with `salmon new` command. That create an article template and directories for codes and images.
+
+```
+$ salmon new awesome_article
+[2019-06-02T08:10:16Z INFO  salmon::template_generator] Created a directory "./articles/2019/06/02"
+[2019-06-02T08:10:16Z INFO  salmon::template_generator] Wrote an article template to "./articles/2019/06/02/awesome_article.md"
+[2019-06-02T08:10:16Z INFO  salmon::template_generator] Created a directory "./codes/2019/06/02"
+[2019-06-02T08:10:16Z INFO  salmon::template_generator] Created a directory "./resources/images/2019/06/02"
+```
+
+See `salmon new --help` to control the behavior. Salmon creates all templates and directories if there is no options.
+
 ### Log
 
 You can control log level by `RUST_LOG` environment variable. The default value is `info`.
