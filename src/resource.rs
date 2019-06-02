@@ -45,10 +45,10 @@ pub fn load_resources(src_dir: &PathBuf) -> Result<Vec<Resource>, Error> {
                 resources.push(resource);
                 match &resources.last().unwrap() {
                     Resource::StyleSheet(s) => {
-                        log::info!("Stylesheet \"{:?}\" has been loaded.", s.src_path)
+                        log::debug!("Stylesheet \"{:?}\" has been loaded.", s.src_path)
                     }
                     Resource::General(g) => {
-                        log::info!("Resource \"{:?}\" has been loaded.", g.src_path)
+                        log::debug!("Resource \"{:?}\" has been loaded.", g.src_path)
                     }
                 }
             }

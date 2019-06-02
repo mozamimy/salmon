@@ -44,7 +44,7 @@ pub struct Blog {
 
 impl Blog {
     pub fn init(src_dir: PathBuf, dest_dir: PathBuf, config: Config) -> Result<Self, Error> {
-        log::info!("Start to load project files.");
+        log::debug!("Start to load project files.");
 
         let (articles_by_tag, articles_by_year, sorted_articles) = load_articles(&src_dir)?;
         let layouts = load_layouts(&src_dir)?;
@@ -53,7 +53,7 @@ impl Blog {
         let codes = load_codes(&src_dir)?;
         let resources = load_resources(&src_dir)?;
 
-        log::info!("Finished to load project files.");
+        log::debug!("Finished to load project files.");
 
         Ok(Blog {
             config: config,
@@ -152,7 +152,7 @@ impl Blog {
             let mut file = File::create(dest_path)?;
             file.write_all(html.as_bytes())?;
 
-            log::info!("Wrote index page {:?}.", file);
+            log::debug!("Wrote index page {:?}.", file);
         }
 
         Ok(())
@@ -192,7 +192,7 @@ impl Blog {
             let mut file = File::create(dest_full_path)?;
             file.write_all(html.as_bytes())?;
 
-            log::info!("Wrote article page {:?}", file);
+            log::debug!("Wrote article page {:?}", file);
         }
 
         Ok(())
@@ -274,7 +274,7 @@ impl Blog {
                 let mut file = File::create(dest_full_path)?;
                 file.write_all(html.as_bytes())?;
 
-                log::info!("Wrote tag page {:?}", file);
+                log::debug!("Wrote tag page {:?}", file);
             }
         }
 
@@ -356,7 +356,7 @@ impl Blog {
                 let mut file = File::create(dest_full_path)?;
                 file.write_all(html.as_bytes())?;
 
-                log::info!("Wrote year page {:?}", file);
+                log::debug!("Wrote year page {:?}", file);
             }
         }
         Ok(())
@@ -382,7 +382,7 @@ impl Blog {
             let mut file = File::create(dest_full_path)?;
             file.write_all(html.as_bytes())?;
 
-            log::info!("Wrote general page {:?}", file);
+            log::debug!("Wrote general page {:?}", file);
         }
 
         Ok(())
@@ -408,7 +408,7 @@ impl Blog {
         let mut file = File::create(self.dest_dir.join("feed.xml"))?;
         file.write_all(html.as_bytes())?;
 
-        log::info!("Wrote RSS");
+        log::debug!("Wrote RSS");
 
         Ok(())
     }
@@ -421,13 +421,13 @@ impl Blog {
                     std::fs::create_dir_all(self.extract_parent_dir(&dest_full_path)?)?;
                     let mut file = File::create(dest_full_path)?;
                     file.write_all(r.compiled.as_bytes())?;
-                    log::info!("Wrote stylesheet {:?}", file);
+                    log::debug!("Wrote stylesheet {:?}", file);
                 }
                 Resource::General(r) => {
                     let dest_full_path = &self.dest_dir.join(&r.dest_path);
                     std::fs::create_dir_all(self.extract_parent_dir(dest_full_path)?)?;
                     std::fs::copy(&r.src_path, dest_full_path)?;
-                    log::info!("Copied general file {:?}", dest_full_path);
+                    log::debug!("Copied general file {:?}", dest_full_path);
                 }
             }
         }

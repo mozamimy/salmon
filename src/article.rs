@@ -52,7 +52,7 @@ pub fn load_articles(
                     .push(article.clone());
                 sorted_articles.push(article.clone());
 
-                log::info!("Article \"{}\" has been loaded.", &article.title);
+                log::debug!("Article \"{}\" has been loaded.", &article.title);
             }
             Err(e) => return Err(failure::format_err!("{:?}", e)),
         }
