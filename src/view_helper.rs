@@ -69,12 +69,12 @@ pub fn article_ogp_meta_tags(
     let site_root = ctx.data().get("site_root").unwrap().as_str().unwrap();
     match article_html.select(&selector_img).next() {
         Some(t) => {
-            let meta_image = format!(
-                // XXX: Ugly hard coded domain :<
-                "<meta property=\"og:image\" content=\"{}{}\">\n",
-                site_root,
-                handlebars::html_escape(t.value().attr("src").unwrap()),
-            );
+            let image_path = handlebars::html_escape(t.value().attr("src").unwrap());
+            let image_url = match build_full_url(site_root, &image_path) {
+                Ok(u) => u,
+                Err(e) => return Err(RenderError::new(format!("{:?}", e))),
+            };
+            let meta_image = format!("<meta property=\"og:image\" content=\"{}\">\n", image_url,);
             out.write(&meta_image)?;
         }
         None => { /* do nothing */ }
@@ -164,4 +164,29 @@ pub fn time_now(
     let now = chrono::Utc::now().to_rfc3339();
     out.write(&now)?;
     Ok(())
+}
+
+fn build_full_url(site_root: &str, path: &str) -> Result<String, failure::Error> {
+    let full_url = url::Url::parse(site_root)?.join(path)?;
+    Ok(full_url.as_str().to_string())
+}
+
+#[test]
+fn test_build_full_url() {
+    assert_eq!(
+        build_full_url("https://example.com", "/foo/bar.jpg").unwrap(),
+        "https://example.com/foo/bar.jpg"
+    );
+    assert_eq!(
+        build_full_url("https://example.com/", "/foo/bar.jpg").unwrap(),
+        "https://example.com/foo/bar.jpg"
+    );
+    assert_eq!(
+        build_full_url("https://example.com/", "foo/bar.jpg").unwrap(),
+        "https://example.com/foo/bar.jpg"
+    );
+    assert_eq!(
+        build_full_url("https://example.com", "foo/bar.jpg").unwrap(),
+        "https://example.com/foo/bar.jpg"
+    );
 }
