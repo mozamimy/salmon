@@ -23,18 +23,18 @@ fn main() -> Result<(), failure::Error> {
     let matches = clap::App::new("salmon")
         .version("0.4.0")
         .author("mozamimy <alice@mozami.me>")
-        .about("A lightweight static site generator specialized for blogging.")
+        .about("A lightweight static site generator specialized for blogging")
         .subcommand(
             clap::SubCommand::with_name("build")
                 .about("Build and generate articles")
                 .arg(
                     clap::Arg::with_name("SRC_DIR")
-                        .help("Specify a directory which has salmon source files.")
+                        .help("Specify a directory which has salmon source files")
                         .index(1),
                 )
                 .arg(
                     clap::Arg::with_name("DEST_DIR")
-                        .help("Specify a destination directory to put built files.")
+                        .help("Specify a destination directory to put built files")
                         .index(2),
                 ),
         )
@@ -43,31 +43,31 @@ fn main() -> Result<(), failure::Error> {
                 .about("Create new files and directories to start writing")
                 .arg(
                     clap::Arg::with_name("ARTICLE_NAME")
-                        .help("This value is used to determine article file name.")
+                        .help("This value is used to determine article file name")
                         .index(1),
                 )
                 .arg(
                     clap::Arg::with_name("PROJECT_DIR")
-                        .help("Specify your Salmon project directory.")
+                        .help("Specify your Salmon project directory")
                         .index(2),
                 )
                 .arg(
                     clap::Arg::with_name("article")
                         .short("a")
                         .long("article")
-                        .help("Specify this if you want to create a template of article."),
+                        .help("Specify this if you want to create a template of article"),
                 )
                 .arg(
                     clap::Arg::with_name("code")
                         .short("c")
                         .long("code")
-                        .help("Specify this if you want to create a directory for codes."),
+                        .help("Specify this if you want to create a directory for codes"),
                 )
                 .arg(
                     clap::Arg::with_name("image")
                         .short("i")
                         .long("image")
-                        .help("Specify this if you want to create a directory for images."),
+                        .help("Specify this if you want to create a directory for images"),
                 ),
         )
         .get_matches();
