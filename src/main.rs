@@ -26,6 +26,7 @@ fn main() -> Result<(), failure::Error> {
         .about("A lightweight static site generator specialized for blogging.")
         .subcommand(
             clap::SubCommand::with_name("build")
+                .about("Build and generate articles")
                 .arg(
                     clap::Arg::with_name("SRC_DIR")
                         .help("Specify a directory which has salmon source files.")
@@ -39,6 +40,7 @@ fn main() -> Result<(), failure::Error> {
         )
         .subcommand(
             clap::SubCommand::with_name("new")
+                .about("Create new files and directories to start writing")
                 .arg(
                     clap::Arg::with_name("ARTICLE_NAME")
                         .help("This value is used to determine article file name.")
