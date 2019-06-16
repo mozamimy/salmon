@@ -1,3 +1,13 @@
+# 0.4.1 (2019-06-16)
+
+## Bug fixes
+
+- Make `site_root` config handle URL terminated by `/`. Hence, both `https://example.com` and `https://example.com/` are acceptable.
+
+## Improvements
+
+- Improve help messages
+
 # 0.4.0 (2019-06-02)
 
 ## New features
