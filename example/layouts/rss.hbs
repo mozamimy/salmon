@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>New Salmon Blog</title>
+  <subtitle>New Salmon Blog</subtitle>
+  <id>http://example.com/</id>
+  <link href="http://example.com/"/>
+  <link href="http://example.com/feed.xml" rel="self"/>
+  <updated>{{ convert_to_iso8601 articles.[0].date }}</updated>
+  <author>
+    <name>Jane Due</name>
+  </author>
+  {{#each articles as |article|}}
+  <entry>
+    <title>{{ article.title }}</title>
+    <link rel="alternate" href="http://example.com{{ article.path }}"/>
+    <id>http://example.com{{ article.path }}</id>
+    <published>{{ convert_to_iso8601 article.date }}</published>
+    <updated>{{ time_now dummy }}</updated>
+    <author>
+      <name>Jane Due</name>
+    </author>
+    <summary type="html">
+      {{ summarize_article article true }}
+    </summary>
+  </entry>
+  {{/each}}
+</feed>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>New Salmon Blog - index</title>
+    <link href="/stylesheets/layout.css" rel="stylesheet">
+  </head>
+  {{> header }}
+  <body>
+    <div id="main">
+      {{#each articles as |article| }}
+      <article>
+        <hgroup>
+          <date datetime="{{ convert_to_iso8601 article.date }}">
+            {{ article.date }}
+          </date>
+          <h1>
+            <a href="{{ article.path }}">{{ article.title }}</a>
+          </h1>
+          {{ summarize_article article }}
+          <div class="read_more">
+            <a href="{{ article.path }}">Read more &gt;&gt;</a>
+          </div>
+        </hgroup>
+      </article>
+      {{/each}}
+      {{#if paginate }}
+      {{> nav_paginate}}
+      {{/if}}
+    </div>
+    {{> menu }}
+  </body>
+</html>
