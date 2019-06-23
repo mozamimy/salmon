@@ -24,6 +24,7 @@ pub struct Layouts {
 }
 
 pub fn load_layouts(src_dir: &PathBuf) -> Result<Layouts, Error> {
+    log::info!("Start to load layout files.");
     Ok(Layouts {
         index: load_index(src_dir)?,
         article: load_article(src_dir)?,
@@ -59,9 +60,10 @@ fn load_rss(src_dir: &PathBuf) -> Result<Layout, Error> {
 }
 
 fn load_file(src_dir: &PathBuf, file_name: &str) -> Result<String, Error> {
-    let mut file = File::open(src_dir.join("layouts").join(file_name))?;
+    let file_path = src_dir.join("layouts").join(file_name);
+    log::info!("Loading a layout: {:?}", file_path);
+    let mut file = File::open(&file_path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    log::debug!("Layout \"{}\" has been loaded.", file_name);
     Ok(content)
 }
