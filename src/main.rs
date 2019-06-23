@@ -80,6 +80,7 @@ fn main() -> Result<(), failure::Error> {
                     .value_of("SRC_DIR")
                     .unwrap_or("./"),
             );
+
             let dest_dir;
             if let Some(dest_dir_str) = m.subcommand_matches("build").unwrap().value_of("DEST_DIR")
             {
@@ -87,13 +88,29 @@ fn main() -> Result<(), failure::Error> {
             } else {
                 dest_dir = std::path::PathBuf::from(&src_dir.join("build/"));
             }
+            match std::fs::create_dir_all(&dest_dir) {
+                Ok(_) => log::debug!("Created destination directory: {:?}", dest_dir),
+                Err(e) => {
+                    log::error!("Failed to create destination directory: {:?}", dest_dir);
+                    log::error!("{:?}", e);
+                    std::process::exit(1)
+                }
+            }
 
             let canonicalized_src_dir = src_dir.canonicalize().unwrap_or_else(|e| {
-                log::error!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!(
+                    "Failed to canonicalize source directory path: {:?}.",
+                    src_dir
+                );
+                log::error!("{:?}", e);
                 std::process::exit(1)
             });
             let canonicalized_dest_dir = dest_dir.canonicalize().unwrap_or_else(|e| {
-                log::error!("Failed to canonicalize source directory path: {:?}", e);
+                log::error!(
+                    "Failed to canonicalize destination directory path: {:?}",
+                    dest_dir
+                );
+                log::error!("{:?}", e);
                 std::process::exit(1)
             });
 
