@@ -1,0 +1,57 @@
+<aside>
+  <section>
+    <h2>Pages</h2>
+    <ul>
+      <li>
+        <a href="/example.html">
+          Example
+        </a>
+      </li>
+    </ul>
+  </section>
+  <section>
+    <h2>Recent Articles</h2>
+    <ul>
+      {{#each recent_articles as |recent_article| }}
+      <li>
+        <a href="{{ recent_article.path }}">
+          <date datetime="{{ convert_to_iso8601 recent_article.date }}">
+            {{ recent_article.date }}
+          </date>
+          <div>
+            {{ recent_article.title }}
+          </div>
+        </a>
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  <section>
+    <h2>Tags</h2>
+    <ul>
+      {{#each tags as |tag| }}
+      <li>
+        <a href="/tags/{{ tag.key }}.html">
+          <div>
+            {{ tag.key }} ({{ tag.len }})
+          </div>
+        </a>
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  <section>
+    <h2>By Year</h2>
+    <ul>
+      {{#each years as |year| }}
+      <li>
+        <a href="/{{ year.year }}.html">
+          <div>
+            {{ year.year }} ({{ year.len }})
+          </div>
+        </a>
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+</aside>

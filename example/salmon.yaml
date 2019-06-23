@@ -1,0 +1,9 @@
+version: '1'
+blog:
+  site_root: 'https://example.com'
+  index_page:
+    entries_per_page: 10
+  year_page:
+    entries_per_page: 15
+  tag_page:
+    entries_per_page: 15

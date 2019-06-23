@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Articles of {{ year_num }}</title>
+    <link href="/stylesheets/layout.css" rel="stylesheet">
+  </head>
+  {{> header }}
+  <div>
+    <body>
+      <div id="main">
+        <h1>Articles of {{ year_num }}</h1>
+        <ul>
+        {{#each articles as |article| }}
+          <li>
+            <a href="{{ article.path }}">
+              <date datetime="{{ convert_to_iso8601 article.date }}">
+                {{ article.date }}
+              </date>
+              <div>
+                {{ article.title }}
+              </div>
+            </a>
+          </li>
+        {{/each}}
+        </ul>
+        {{#if paginate }}
+        {{> nav_paginate }}
+        {{/if}}
+      </div>
+      {{> menu }}
+    </body>
+  </div>
+</html>

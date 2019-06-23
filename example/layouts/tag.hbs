@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Articles with &quot;{{ tag_name }}&quot; tag</title>
+    <link href="/stylesheets/layout.css" rel="stylesheet">
+  </head>
+  {{> header }}
+    <body>
+    <div id="main">
+      <h1>Articles with &quot;{{ tag_name }}&quot; tag</h1>
+      <ul>
+      {{#each articles as |article| }}
+        <li>
+          <a href="{{ article.path }}">
+            <date datetime="{{ convert_to_iso8601 article.date }}">
+              {{ article.date }}
+            </date>
+            <div>
+              {{ article.title }}
+            </div>
+          </a>
+        </li>
+      {{/each}}
+      </ul>
+      {{#if paginate }}
+      {{> nav_paginate }}
+      {{/if}}
+    </div>
+    {{> menu }}
+  </body>
+</html>
