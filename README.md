@@ -31,7 +31,54 @@ cargo install salmon
 
 ### Initialize Salmon project
 
-(TBD)
+Execute `salmon init` command. Then, some example files are generated in the project directory.
+
+```
+$ salmon init usagi
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /articles/2019/06/23/example.md
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /codes/2019/06/23/example.rb
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/article.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/index.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/page.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/rss.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/tag.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /layouts/year.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /pages/example.md
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /partials/header.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /partials/menu.hbs
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /resources/images/sushi_salmon.png
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /resources/stylesheets/layout.sass
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /salmon.yaml
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Writing /docker-compose.yaml
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Your new Salmon project has been initialized!
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Now you can build with `salmon build` command after moved the pr
+oject directory.
+[2019-06-23T09:28:02Z INFO  salmon::initializer] Execute `docker-compose up nginx` if you want to open your site
+in http://localhost:10080/.
+```
+
+You can build the new project with `salmon build` command.
+
+```
+$ cd usagi/
+$ salmon build
+[2019-06-23T09:28:14Z INFO  salmon::layout] Start to load layout files.
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/index.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/article.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/tag.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/year.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/page.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::layout] Loading a layout: "/home/mozamimy/tmp/usagi/layouts/rss.hbs"
+[2019-06-23T09:28:14Z INFO  salmon::partial] Loading a partial file: "/home/mozamimy/tmp/usagi/partials/header.h$
+s"
+[2019-06-23T09:28:14Z INFO  salmon::partial] Loading a partial file: "/home/mozamimy/tmp/usagi/partials/menu.hbs
+```
+
+Generated docker-compose.yaml helps you to open your first project with Web browser (http://localhost:10080/).
+
+```
+$ docker-compose up nginx
+```
 
 ### Create new article template and directory with `salmon new` command
 
