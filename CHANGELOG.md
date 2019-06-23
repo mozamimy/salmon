@@ -1,3 +1,18 @@
+# 0.5.0 (2019-06-23)
+
+## New features
+
+- Implement `salmon init` command. See https://github.com/mozamimy/salmon#initialize-salmon-project also.
+
+## Bug fixes
+
+- Fix slice range error when the number of article is less than 5.
+
+## Improvements
+
+- Improve log message more user friendly.
+- Create build directory automatically if it is not exist.
+
 # 0.4.1 (2019-06-16)
 
 ## Bug fixes
