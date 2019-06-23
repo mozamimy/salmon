@@ -3,6 +3,7 @@ pub mod blog;
 pub mod code;
 pub mod config;
 pub mod converter;
+pub mod initializer;
 pub mod layout;
 pub mod page;
 pub mod paginator;
@@ -13,6 +14,7 @@ pub mod view_helper;
 
 use crate::blog::Blog;
 use crate::config::Config;
+use crate::initializer::Initializer;
 
 fn main() -> Result<(), failure::Error> {
     if std::env::var("RUST_LOG").is_err() {
@@ -68,6 +70,15 @@ fn main() -> Result<(), failure::Error> {
                         .short("i")
                         .long("image")
                         .help("Specify this if you want to create a directory for images"),
+                ),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("init")
+                .about("Initialize Salmon project")
+                .arg(
+                    clap::Arg::with_name("PROJECT_NAME")
+                        .help("Your project name of Salmon")
+                        .index(1),
                 ),
         )
         .get_matches();
@@ -151,6 +162,40 @@ fn main() -> Result<(), failure::Error> {
                     std::process::exit(1);
                 }
             }
+        }
+        ref m if m.subcommand_matches("init").is_some() => {
+            let project_dir = match std::env::current_dir() {
+                Ok(d) => d.join(
+                    m.subcommand_matches("init")
+                        .unwrap()
+                        .value_of("PROJECT_NAME")
+                        .unwrap_or("salmon"),
+                ),
+                Err(e) => {
+                    log::error!("Failed to get current directory.");
+                    log::error!("{:?}", e);
+                    std::process::exit(1);
+                }
+            };
+            match std::fs::create_dir_all(&project_dir) {
+                Ok(_) => {
+                    let initializer = Initializer::new(project_dir);
+                    let initialize_result = initializer.init();
+                    match initialize_result {
+                        Ok(_) => { /* do nothing */ }
+                        Err(e) => {
+                            log::error!("An error is occured while initializing project.");
+                            log::error!("{:?}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!("Failed to create project directory: {:?}", project_dir);
+                    log::error!("{:?}", e);
+                    std::process::exit(1)
+                }
+            };
         }
         _ => {
             log::error!("Subcommand is not specified or unsupported subcommand.\nexit.");
