@@ -6,6 +6,7 @@ COPY Cargo.toml Cargo.lock /build/
 WORKDIR /build/
 RUN cargo build --release --locked
 COPY src /build/src
+COPY example /build/example
 RUN find src -type f -exec touch {} +  && cargo build --release --locked
 
 FROM debian:stretch-slim
