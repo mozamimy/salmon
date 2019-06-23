@@ -81,7 +81,7 @@ impl Blog {
         self.build_tag_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_year_page(&renderer, &tags, &years, &recent_articles)?;
         self.build_general_page(&renderer)?;
-        self.build_rss(&renderer)?;
+        self.build_rss(&renderer, &recent_articles)?;
         self.put_resources()?;
         Ok(())
     }
@@ -387,17 +387,18 @@ impl Blog {
         Ok(())
     }
 
-    fn build_rss(&self, renderer: &Handlebars) -> Result<(), Error> {
+    fn build_rss(
+        &self,
+        renderer: &Handlebars,
+        recent_articles: &[Rc<Article>],
+    ) -> Result<(), Error> {
         let template_string = match &self.layouts.rss {
             Layout::Rss(s) => s,
             _ => return Err(failure::format_err!("Invalid Layout variant.")),
         };
 
         let mut data = Map::new();
-        data.insert(
-            "articles".to_string(),
-            handlebars::to_json(&self.sorted_articles[0..5]),
-        );
+        data.insert("articles".to_string(), handlebars::to_json(recent_articles));
         data.insert(
             "site_root".to_string(),
             handlebars::to_json(self.site_root()),
@@ -495,7 +496,12 @@ impl Blog {
     }
 
     fn init_recent_articles(&self) -> &[Rc<Article>] {
-        &self.sorted_articles[0..5]
+        let sorted_article_length = self.sorted_articles.len();
+        if sorted_article_length < 5 {
+            &self.sorted_articles[0..sorted_article_length]
+        } else {
+            &self.sorted_articles[0..5]
+        }
     }
 
     fn extract_parent_dir(&self, dest_full_path: &PathBuf) -> Result<PathBuf, Error> {
